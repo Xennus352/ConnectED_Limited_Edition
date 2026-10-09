@@ -2,7 +2,7 @@ import { Request, Router } from "express";
 
 import { prisma } from "../../config/prisma";
 import { asyncHandler } from "../../lib/async-handler";
-import { badRequest, notFound } from "../../lib/errors";
+import { badRequest, forbidden, notFound } from "../../lib/errors";
 import { buildWhere, isObjectId, readPagination } from "../../lib/query";
 import type { RelationFilter } from "../../lib/query";
 import { mapDoc, stripSecrets } from "../../lib/serialize";
@@ -51,6 +51,42 @@ export interface CrudOptions {
   resolve?: (doc: any) => Promise<any> | any;
   /** Remove password hashes from the payload. */
   stripSecrets?: boolean;
+  /** Authorization policy: the UI may hide buttons, but the server decides. */
+  authz?: CrudAuthz;
+}
+
+/**
+ * Server-side authorization for a CRUD resource. Roles decide *whether* and
+ * the two scope hooks decide *which records*. Both are enforced here in the
+ * shared layer so no route can accidentally ship without a policy.
+ */
+export interface CrudAuthz {
+  /** Roles allowed to list/get the resource. Default: any authenticated user. */
+  readRoles?: readonly string[];
+  /** Roles allowed to create/update/delete. Default: any authenticated user. */
+  writeRoles?: readonly string[];
+  /**
+   * Restricts list reads by mutating the `where` clause. Throwing rejects the
+   * whole request; mutating `where` narrows the result set server-side.
+   */
+  readScope?: (
+    req: Request,
+    where: Record<string, any>
+  ) => Promise<void> | void;
+  /** Validates a single resource after it has been loaded for a GET /:id. */
+  readOneScope?: (req: Request, doc: Record<string, any>) => Promise<void> | void;
+  /**
+   * Validates a write. `target` is the parsed payload on create, and the
+   * existing record on update/delete. `payload` carries the parsed request
+   * body on create/update so a scope can compare "who owns it" against
+   * "what the client tried to change". Throw to reject.
+   */
+  writeScope?: (
+    req: Request,
+    mode: "create" | "update" | "delete",
+    target: Record<string, any>,
+    payload?: Record<string, any>
+  ) => Promise<void> | void;
 }
 
 export const crudRouter = (options: CrudOptions): Router => {
@@ -75,6 +111,7 @@ export const crudRouter = (options: CrudOptions): Router => {
     beforeWrite,
     resolve,
     stripSecrets: shouldStrip = false,
+    authz,
   } = options;
 
   const model: any = (prisma as any)[delegate];
@@ -115,6 +152,9 @@ export const crudRouter = (options: CrudOptions): Router => {
       }
     }
 
+    assertRoleIf(req, authz?.readRoles);
+    if (authz?.readScope) await authz.readScope(req, where);
+
     postWhere?.(where, req.query as Record<string, any>);
 
     const { paginate, limit, skip, page } = readPagination(
@@ -150,15 +190,22 @@ export const crudRouter = (options: CrudOptions): Router => {
     const { id } = req.params;
     if (!isObjectId(id)) throw notFound("Resource not found");
 
+    assertRoleIf(req, authz?.readRoles);
+
     const doc = await model.findUnique({ where: { id }, include });
     if (!doc) throw notFound("Resource not found");
+
+    if (authz?.readOneScope) await authz.readOneScope(req, doc);
 
     res.json({ success: true, data: await present(doc) });
   });
 
   /** POST /create */
   const create = asyncHandler(async (req, res) => {
+    assertRoleIf(req, authz?.writeRoles);
+
     let data = buildData(req.body, writeOptions, "create");
+    if (authz?.writeScope) await authz.writeScope(req, "create", data, data);
     if (beforeWrite) data = await beforeWrite(data, "create", req);
 
     const doc = await model.create({ data, include });
@@ -170,12 +217,17 @@ export const crudRouter = (options: CrudOptions): Router => {
     const { id } = req.params;
     if (!isObjectId(id)) throw notFound("Resource not found");
 
+    assertRoleIf(req, authz?.writeRoles);
+
+    const existing = await model.findUnique({ where: { id }, include });
+    if (!existing) throw notFound("Resource not found");
+
     let data = buildData(req.body, writeOptions, "update");
+    if (authz?.writeScope)
+      await authz.writeScope(req, "update", existing, data);
     if (beforeWrite) data = await beforeWrite(data, "update", req);
 
     if (!Object.keys(data).length) {
-      const existing = await model.findUnique({ where: { id }, include });
-      if (!existing) throw notFound("Resource not found");
       res.json({ success: true, data: await present(existing) });
       return;
     }
@@ -189,8 +241,12 @@ export const crudRouter = (options: CrudOptions): Router => {
     const { id } = req.params;
     if (!isObjectId(id)) throw notFound("Resource not found");
 
+    assertRoleIf(req, authz?.writeRoles);
+
     const existing = await model.findUnique({ where: { id } });
     if (!existing) throw notFound("Resource not found");
+
+    if (authz?.writeScope) await authz.writeScope(req, "delete", existing);
 
     const doc = await model.delete({ where: { id } });
     res.json({ success: true, data: await present(doc) });
@@ -200,14 +256,26 @@ export const crudRouter = (options: CrudOptions): Router => {
     throw badRequest("This resource is read-only");
   });
 
+  const assertRoleIf = (req: Request, roles?: readonly string[]) => {
+    if (!roles?.length) return;
+    const role = req.user?.role?.toLowerCase?.();
+    if (!role || !roles.includes(role)) {
+      throw forbidden("You do not have permission to perform this action");
+    }
+  };
+
   for (const related of relatedRoutes) {
     router.get(
       related.path,
       asyncHandler(async (req, res) => {
+        assertRoleIf(req, authz?.readRoles);
+
         const value = req.params[related.param];
         const where: Record<string, any> = isObjectId(value)
           ? { [related.field]: value }
           : { [related.field]: { in: [] } };
+
+        if (authz?.readScope) await authz.readScope(req, where);
 
         postWhere?.(where, req.query as Record<string, any>);
 

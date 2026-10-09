@@ -2,12 +2,13 @@ import { Router } from "express";
 
 import { prisma } from "../../config/prisma";
 import { asyncHandler } from "../../lib/async-handler";
-import { badRequest, notFound } from "../../lib/errors";
+import { badRequest, forbidden, notFound } from "../../lib/errors";
 import { hashPassword } from "../../lib/password";
 import { isObjectId } from "../../lib/query";
 import { mapDoc, stripSecrets } from "../../lib/serialize";
 import { buildData, idOf, WriteOptions } from "../../lib/write";
 import { crudRouter } from "../shared/crud";
+import { ADMIN_ROLES, STAFF_ROLES, assertAdmin, teacherClassIds } from "../../lib/authz";
 
 /** Hashes the incoming password and never lets an empty one through. */
 const withPassword = async (
@@ -31,6 +32,38 @@ const withPassword = async (
 
 const userSearchable = ["fullName", "username", "email", "phoneNumber", "address"];
 const baseDates = ["birthday"];
+
+/** Teachers may read the directory; only admins may manage accounts. */
+const peopleAuthz = {
+  writeRoles: ADMIN_ROLES,
+};
+
+/**
+ * Scopes student reads to a teacher's authorized classes. Asking for a class
+ * outside the scope or reading the full directory simply matches nothing.
+ */
+const studentReadScope = async (req: any, where: Record<string, any>) => {
+  if (req.user?.role !== "teacher") return;
+  const scope = await teacherClassIds(req.user.id);
+  where.classId = { in: [...scope] };
+};
+
+/**
+ * Scopes parent reads to parents of students in the teacher's classes.
+ * Private directory fields are never exposed beyond an authorized class.
+ */
+const parentReadScope = async (req: any, where: Record<string, any>) => {
+  if (req.user?.role !== "teacher") return;
+  const scope = await teacherClassIds(req.user.id);
+  const students = await prisma.student.findMany({
+    where: { classId: { in: [...scope] } },
+    select: { parentId: true },
+  });
+  const parentIds = students
+    .map((s) => s.parentId)
+    .filter((id): id is string => Boolean(id));
+  where.id = { in: parentIds };
+};
 
 /**
  * `subjects` and `assignedClasses` travel as lists of ids (or of populated
@@ -109,6 +142,7 @@ export const adminsRouter = crudRouter({
   relationInputs: {},
   stripSecrets: true,
   beforeWrite: withPassword,
+  authz: { readRoles: ADMIN_ROLES, writeRoles: ADMIN_ROLES },
 });
 
 // ---------------------------------------------------------------------------
@@ -130,6 +164,7 @@ export const teachersRouter = crudRouter({
   stripSecrets: true,
   beforeWrite: teacherLinks,
   resolve: expandTeacherLinks,
+  authz: { readRoles: STAFF_ROLES, writeRoles: ADMIN_ROLES },
 });
 
 // ---------------------------------------------------------------------------
@@ -157,6 +192,17 @@ export const studentsRouter = crudRouter({
   relationInputs: { class: "classId", parent: "parentId" },
   stripSecrets: true,
   beforeWrite: withPassword,
+  authz: {
+    ...peopleAuthz,
+    readScope: studentReadScope,
+    readOneScope: async (req, doc) => {
+      if (req.user?.role !== "teacher") return;
+      const scope = await teacherClassIds(req.user.id);
+      if (doc.classId && !scope.has(String(doc.classId))) {
+        throw forbidden("You do not have access to this student");
+      }
+    },
+  },
 });
 
 // ---------------------------------------------------------------------------
@@ -184,6 +230,7 @@ export const parentsRouter = crudRouter({
   manyRelations: { children: "connect" },
   stripSecrets: true,
   beforeWrite: withPassword,
+  authz: { ...peopleAuthz, readScope: parentReadScope },
 });
 
 
@@ -259,6 +306,7 @@ export const driversRouter = Router();
 driversRouter.post(
   "/create",
   asyncHandler(async (req, res) => {
+    assertAdmin(req);
     const data = await withPassword(
       buildData(req.body, driverWriteOptions, "create"),
       "create"
@@ -278,6 +326,7 @@ driversRouter.post(
 driversRouter.put(
   "/:id",
   asyncHandler(async (req, res) => {
+    assertAdmin(req);
     const { id } = req.params;
     if (!isObjectId(id)) throw notFound("Resource not found");
 
@@ -324,6 +373,7 @@ driversRouter.put(
 driversRouter.delete(
   "/:id",
   asyncHandler(async (req, res) => {
+    assertAdmin(req);
     const { id } = req.params;
     if (!isObjectId(id)) throw notFound("Resource not found");
 
@@ -349,5 +399,6 @@ driversRouter.use(
     relationInputs: { bus: "busId" },
     stripSecrets: true,
     readOnly: true,
+    authz: { readRoles: ADMIN_ROLES },
   })
 );
