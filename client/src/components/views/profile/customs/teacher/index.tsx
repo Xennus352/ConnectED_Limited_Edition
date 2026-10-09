@@ -61,11 +61,6 @@ const TeacherProfile: React.FC = () => {
         ? format(new Date(initialValues.birthday), "MMMM dd, yyyy")
         : "—",
     },
-    {
-      label: t("user_form.address"),
-      icon: <MapPin className='h-4 w-4 text-muted-foreground' />,
-      value: initialValues.address || "—",
-    },
   ];
 
   return (
@@ -135,10 +130,21 @@ const TeacherProfile: React.FC = () => {
                 </span>
                 <div className='min-w-0'>
                   <p className='text-xs text-muted-foreground'>{detail.label}</p>
-                  <p className='truncate text-sm font-medium'>{detail.value}</p>
+                  <p className='break-words text-sm font-medium'>{detail.value}</p>
                 </div>
               </div>
             ))}
+            <div className='flex items-start gap-3 rounded-xl border bg-card px-4 py-3 shadow-sm sm:col-span-2'>
+              <span className='flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted'>
+                <MapPin className='h-4 w-4 text-muted-foreground' />
+              </span>
+              <div className='min-w-0 flex-1'>
+                <p className='text-xs text-muted-foreground'>{t("user_form.address")}</p>
+                <p className='break-words text-sm font-medium [overflow-wrap:anywhere]'>
+                  {initialValues.address || "—"}
+                </p>
+              </div>
+            </div>
             <div className='flex items-start gap-3 rounded-xl border bg-card px-4 py-3 shadow-sm sm:col-span-2'>
               <span className='flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted'>
                 <BookOpen className='h-4 w-4 text-muted-foreground' />

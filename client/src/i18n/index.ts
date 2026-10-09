@@ -17,7 +17,7 @@ i18n
       // `?rev=` busts any stale i18next/HTTP caches so newly added
       // translation keys (e.g. driver_form.*, teacher_dashboard.*, the
       // fleet/attendance blocks) are picked up on reload.
-      loadPath: "/locale/{{lng}}/{{ns}}.json?rev=8",
+      loadPath: "/locale/{{lng}}/{{ns}}.json?rev=9",
     },
     detection: {
       order: [

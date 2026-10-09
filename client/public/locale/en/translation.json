@@ -352,7 +352,16 @@
     "failed_to_create_result": "Failed to create Result, Please try again later",
     "failed_to_edit_result": "Failed to edit Result, Please try again later",
     "failed_to_delete_result": "Failed to delete Result, Please try again later",
-    "failed_to_fetch_result": "Failed to fetch Result, Please try again later"
+    "failed_to_fetch_result": "Failed to fetch Result, Please try again later",
+    "failed_to_fetch_results": "Failed to fetch Results, Please try again later",
+    "failed_to_update_result": "Failed to update Result, Please try again later",
+    "description": "Description",
+    "enter_description": "Enter description",
+    "score": "Score",
+    "description_required": "Description is required!",
+    "score_required": "Score is required!",
+    "score_min_error": "Score must be at least 0",
+    "score_max_error": "Score must be at most 100"
   },
   "admin_dashboard": {
     "admins": "Admins",
