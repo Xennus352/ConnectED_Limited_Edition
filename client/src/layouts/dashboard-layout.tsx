@@ -30,12 +30,12 @@ const DashboardLayout: React.FC = () => {
       <SidebarInset>
         <Navbar />
         <main
-          className={`flex flex-1 flex-col gap-4 bg-background p-5 ${
+          className={`flex min-w-0 flex-1 flex-col gap-4 overflow-x-clip bg-background p-5 ${
             isDriver ? "pb-24 lg:pb-5" : ""
           }`}
         >
           {/* bg-muted/50 */}
-          <div className='min-h-[100vh] flex-1 md:min-h-min'>
+          <div className='min-h-[100vh] min-w-0 flex-1 md:min-h-min'>
             <SuspenseWrapper>
               {hasOutlet ? (
                 <Outlet />

@@ -14,7 +14,7 @@ const UserInfo: React.FC = () => {
 
   return (
     <div className='flex items-center gap-2'>
-      <div className='flex flex-col min-w-[90px] items-end'>
+      <div className='hidden sm:flex flex-col min-w-[90px] items-end'>
         <h2 className='text-sm font-bold'>{user?.fullName}</h2>
         <p className='text-xs'>
           <span className='w-2 h-2 inline-block bg-success rounded-full mr-[1px]' />{" "}

@@ -399,11 +399,11 @@ const ClassAttendancePageView: React.FC = () => {
         {/* Roster ------------------------------------------------------------ */}
         <div className='overflow-hidden rounded-xl border bg-card shadow-sm'>
           <div className='flex items-center justify-between border-b bg-muted/30 px-4 py-2.5'>
-            <p className='flex items-center gap-2 text-sm font-semibold'>
+            <div className='flex items-center gap-2 text-sm font-semibold'>
               <ClipboardCheck className='h-4 w-4 text-primary' />
               {t("attendance_class.roster_title")}
               <Badge variant='secondary'>{roster.length}</Badge>
-            </p>
+            </div>
             <p className='hidden text-xs text-muted-foreground sm:block'>
               {t("attendance_class.legend")}
             </p>

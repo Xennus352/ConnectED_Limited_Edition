@@ -346,7 +346,7 @@ const TeacherDashboard: React.FC = () => {
   const showMetrics = lessonsLoading || examsLoading || assignmentsLoading;
 
   return (
-    <div ref={root} className='flex flex-col gap-5'>
+    <div ref={root} className='flex min-w-0 flex-col gap-5'>
       {/* Header ---------------------------------------------------------- */}
       <div data-gsap='fade-up' className='flex flex-wrap items-center gap-4'>
         {user?.profilePhoto ? (
@@ -361,7 +361,7 @@ const TeacherDashboard: React.FC = () => {
           </div>
         )}
         <div className='min-w-0 flex-1'>
-          <h1 className='text-xl font-bold tracking-tight md:text-2xl'>
+          <h1 className='text-xl font-bold tracking-tight [overflow-wrap:anywhere] md:text-2xl'>
             {t(greeting(nowParts.hour))},{" "}
             <span className='text-primary'>{reducedGeneric(user?.fullName)}</span> 👋
           </h1>
@@ -411,7 +411,7 @@ const TeacherDashboard: React.FC = () => {
 
       <div className='grid gap-4 lg:grid-cols-[1.6fr_1fr]'>
         {/* LEFT: today + workload ---------------------------------------- */}
-        <div className='flex flex-col gap-4'>
+        <div className='flex min-w-0 flex-col gap-4'>
           <SectionScaffold
             title={t("teacher_dashboard.todays_classes")}
             icon={<CalendarDays className='h-4 w-4 text-primary' />}
@@ -513,7 +513,7 @@ const TeacherDashboard: React.FC = () => {
         </div>
 
         {/* RIGHT: deadlines + activity ----------------------------------- */}
-        <div className='flex flex-col gap-4'>
+        <div className='flex min-w-0 flex-col gap-4'>
           <SectionScaffold
             title={t("teacher_dashboard.upcoming_exams")}
             icon={<GraduationCap className='h-4 w-4 text-warning' />}

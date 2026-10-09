@@ -32,7 +32,7 @@ const HomePageComponent: React.FC = () => {
         {user?.role === "parent" && <ParentDashboard />}
 
         {/* RIGHT SIDE */}
-        <div className='flex flex-col sm:flex-row md:flex-col gap-4 lg:max-w-[340px]'>
+        <div className='flex min-w-0 flex-col sm:flex-row md:flex-col gap-4 lg:max-w-[340px]'>
           {/* CALENDAR */}
           <Calendar />
 
