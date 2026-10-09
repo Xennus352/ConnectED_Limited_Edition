@@ -1,0 +1,17 @@
+{
+  "name": "connect-ed",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ConnectED — School Management ERP/CRM (React client + Express API + MongoDB)",
+  "scripts": {
+    "dev": "pnpm -r --parallel dev",
+    "dev:client": "pnpm --filter ./client dev",
+    "dev:server": "pnpm --filter ./server dev",
+    "build": "pnpm -r build",
+    "db:up": "bash scripts/db.sh up",
+    "db:down": "bash scripts/db.sh down",
+    "db:setup": "pnpm --filter ./server setup",
+    "db:reset": "pnpm --filter ./server db:reset",
+    "db:studio": "pnpm --filter ./server db:studio"
+  }
+}

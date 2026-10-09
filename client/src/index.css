@@ -1,0 +1,620 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@300;400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: "Poppins", sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+/* Base text size — 18px for a larger UI.
+   Every Tailwind rem-based size (and spacing) scales with it. */
+html {
+  font-size: 18px;
+}
+
+@layer base {
+  /* ---------------------------------------------------------------
+     ConnectED — Telegram-inspired semantic token system
+     Light theme (default) and Telegram Night Mode (.dark)
+     --------------------------------------------------------------- */
+  :root {
+    --background: 210 40% 96%; /* #F1F5F9 */
+    --foreground: 0 0% 0%; /* #000000 */
+
+    --card: 0 0% 100%; /* #FFFFFF */
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+
+    --primary: 207 70% 47%; /* #2481CC */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 40% 96%; /* subtle surface */
+    --secondary-foreground: 0 0% 0%;
+
+    --muted: 210 40% 94%;
+    --muted-foreground: 207 4% 46%; /* #707579 */
+
+    --accent: 207 70% 96%; /* pale blue hover tint */
+    --accent-foreground: 207 70% 34%;
+    --accent-strong: 200 85% 55%; /* #2AABEE */
+    --text-primary: 0 0% 0%; /* #000000 */
+    --text-secondary: 210 11% 55%; /* #7F8C99 */
+    --text-muted: 210 4% 46%; /* #5F6368 */
+
+    --destructive: 0 76% 57%; /* #E53E3E */
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 110 45% 43%; /* #4E9F3D */
+    --success-foreground: 0 0% 100%;
+    --warning: 42 91% 53%; /* #E3A008 */
+    --warning-foreground: 24 60% 15%;
+    --error: 0 76% 57%; /* #E53E3E */
+    --error-foreground: 0 0% 100%;
+
+    --border: 207 20% 90%; /* 1px subtle separation */
+    --input: 207 20% 88%;
+    --ring: 207 70% 47%; /* focus ring = primary blue */
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 100%; /* #FFFFFF */
+    --sidebar-foreground: 0 0% 0%;
+    --sidebar-primary: 207 70% 47%; /* #2481CC */
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 207 70% 96%; /* subtle blue hover */
+    --sidebar-accent-foreground: 207 70% 34%;
+    --sidebar-border: 207 20% 90%;
+    --sidebar-ring: 207 70% 47%;
+
+    --chart-1: 207 70% 47%;
+    --chart-2: 110 45% 43%;
+    --chart-3: 42 91% 53%;
+    --chart-4: 200 70% 68%;
+    --chart-5: 207 35% 52%;
+  }
+
+  .dark {
+    --background: 215 40% 9%; /* #0E1621 */
+    --foreground: 0 0% 96%; /* #F5F5F5 */
+
+    --card: 210 30% 13%; /* #17212B */
+    --card-foreground: 0 0% 96%;
+    --popover: 210 30% 13%;
+    --popover-foreground: 0 0% 96%;
+
+    --primary: 211 47% 54%; /* #5288C1 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 211 25% 17%;
+    --secondary-foreground: 0 0% 96%;
+
+    --muted: 211 20% 15%;
+    --muted-foreground: 210 11% 55%; /* #7F8C99 */
+
+    --accent: 211 47% 22%; /* blue-tinted hover */
+    --accent-foreground: 211 60% 78%;
+    --accent-strong: 208 56% 42%; /* #2F6EA5 */
+
+    --destructive: 0 69% 67%; /* #E57373 */
+    --destructive-foreground: 0 0% 10%;
+
+    --success: 123 41% 50%; /* #4CB452 */
+    --success-foreground: 0 0% 8%;
+    --warning: 47 90% 55%; /* #F3C623 */
+    --warning-foreground: 24 60% 10%;
+    --error: 0 69% 67%; /* #E57373 */
+    --error-foreground: 0 0% 8%;
+
+    --border: 211 25% 18%;
+    --input: 211 25% 21%;
+    --ring: 211 47% 54%;
+    --radius: 0.5rem;
+
+    --sidebar-background: 210 30% 13%; /* #17212B */
+    --sidebar-foreground: 0 0% 96%;
+    --sidebar-primary: 211 47% 54%; /* #5288C1 */
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 211 47% 22%; /* subtle blue hover */
+    --sidebar-accent-foreground: 211 60% 78%;
+    --sidebar-border: 211 25% 18%;
+    --sidebar-ring: 211 47% 54%;
+
+    --chart-1: 211 47% 54%;
+    --chart-2: 123 41% 50%;
+    --chart-3: 47 90% 55%;
+    --chart-4: 211 40% 68%;
+    --chart-5: 211 25% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* ----------------------- center ----------------------- */
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ----------------------- error field ----------------------- */
+
+@keyframes input-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+  75% {
+    transform: translateX(-4px);
+  }
+}
+
+.input-error {
+  border: 1px solid hsl(var(--error)) !important;
+  color: hsl(var(--error)) !important;
+
+  animation: input-shake 0.5s ease;
+}
+
+.error {
+  color: hsl(var(--error));
+  font-size: 13px;
+}
+
+@keyframes button-shake {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  20%,
+  60% {
+    transform: rotate(-2deg);
+  }
+  40%,
+  80% {
+    transform: rotate(5deg);
+  }
+}
+
+.button-error {
+  animation: button-shake 0.6s ease;
+}
+
+/* ----------------------- chat typing indicator ----------------------- */
+/* Telegram-style bouncing dots — delays are set inline per dot. */
+@keyframes typing-bounce {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+/* ----------------------- spinner ----------------------- */
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* ----------------------- data-table ----------------------- */
+.data-table-style {
+  min-width: 1200px;
+}
+
+/* General scrollbar styling for modern browsers */
+::-webkit-scrollbar {
+  width: 4px; /* For vertical scrollbars */
+  height: 8px; /* For horizontal scrollbars */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-foreground) / 0.5); /* Scrollbar thumb color */
+  border-radius: 8px; /* Rounded corners */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--muted-foreground) / 0.8); /* Darker on hover */
+}
+
+::-webkit-scrollbar-track {
+  background: transparent; /* Track follows the surface */
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin; /* Use thin scrollbar */
+  scrollbar-color: hsl(var(--muted-foreground) / 0.5) transparent; /* Thumb color and track color */
+}
+
+/* React Big Calendar */
+
+.react-calendar {
+  width: 100% !important;
+  border: none !important;
+  font-family: "Inter", sans-serif !important;
+}
+
+.react-calendar__navigation__label__labelText {
+  font-weight: 600;
+}
+
+.react-calendar__tile--active {
+  background-color: hsl(var(--primary) / 0.18) !important;
+  color: hsl(var(--primary)) !important;
+}
+
+.rbc-btn-group:first-child {
+  display: none !important;
+}
+
+.rbc-toolbar-label {
+  text-align: right !important;
+  padding: 0px 20px !important;
+}
+
+.rbc-btn-group:last-child {
+  font-size: 13px !important;
+}
+
+.rbc-btn-group:last-child button {
+  border: none !important;
+  background-color: hsl(var(--secondary)) !important;
+  color: hsl(var(--foreground)) !important;
+  margin-left: 2px !important;
+}
+
+.rbc-toolbar button.rbc-active {
+  background-color: hsl(var(--primary) / 0.18) !important;
+  color: hsl(var(--primary)) !important;
+  box-shadow: none !important;
+}
+
+.rbc-time-view {
+  border-color: hsl(var(--border)) !important;
+}
+
+.rbc-time-header {
+  display: none !important;
+}
+
+.rbc-time-content {
+  border: none !important;
+}
+
+.rbc-time-gutter.rbc-time-column {
+  font-size: 12px !important;
+}
+
+.rbc-time-gutter.rbc-time-column .rbc-timeslot-group {
+  padding: 0px 20px !important;
+}
+
+.rbc-timeslot-group {
+  background-color: hsl(var(--primary) / 0.04) !important;
+}
+
+.rbc-day-slot {
+  font-size: 14px !important;
+}
+
+.rbc-event {
+  border: none !important;
+  color: hsl(var(--foreground)) !important;
+  padding: 10px !important;
+  margin: 10px !important;
+  width: 99% !important;
+  height: fit-content !important;
+}
+
+/* Soft pastel tints for calendar events — derived from the palette,
+   kept low-contrast so both themes read the same */
+.rbc-event:nth-child(1) {
+  background-color: hsl(var(--primary) / 0.16) !important;
+}
+.rbc-event:nth-child(2) {
+  background-color: hsl(var(--warning) / 0.18) !important;
+}
+.rbc-event:nth-child(3) {
+  background-color: hsl(var(--chart-5) / 0.18) !important;
+}
+.rbc-event:nth-child(4) {
+  background-color: hsl(var(--success) / 0.16) !important;
+}
+.rbc-event:nth-child(5) {
+  background-color: hsl(var(--primary) / 0.16) !important;
+}
+.rbc-event:nth-child(6) {
+  background-color: hsl(var(--warning) / 0.18) !important;
+}
+.rbc-event:nth-child(7) {
+  background-color: hsl(var(--chart-5) / 0.18) !important;
+}
+.rbc-event:nth-child(8) {
+  background-color: hsl(var(--success) / 0.16) !important;
+}
+
+.rbc-event-label {
+  color: hsl(var(--muted-foreground)) !important;
+  margin-bottom: 5px;
+}
+
+/* ---------------------------------------------------------------
+   ConnectED sidebar — follows the semantic token system above
+   (--sidebar-background / --sidebar-foreground / --sidebar-primary),
+   so it matches the app's custom colors and switches with the
+   light/dark theme like the rest of the UI.
+   --------------------------------------------------------------- */
+
+/* Very subtle scrollbar — only the navigation region scrolls. */
+[data-sidebar="content"] {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(148 163 184 / 0.2) transparent;
+}
+[data-sidebar="content"]::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+[data-sidebar="content"]::-webkit-scrollbar-track {
+  background: transparent;
+}
+[data-sidebar="content"]::-webkit-scrollbar-thumb {
+  background-color: rgb(148 163 184 / 0.2);
+  border-radius: 9999px;
+}
+[data-sidebar="content"]:hover::-webkit-scrollbar-thumb {
+  background-color: rgb(148 163 184 / 0.35);
+}
+
+/* Fleet text contrast improvements */
+.text-muted-foreground {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.text-muted {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* Myanmar font adaptation for fleet components */
+.fleet-text {
+  font-family: "Noto Sans Myanmar", sans-serif;
+}
+
+/* Map overlay background contrast */
+.bg-muted\/40 {
+  background-color: hsl(var(--muted) / 0.4) !important;
+}
+
+/* Dark mode text visibility */
+.dark .text-muted,
+.dark .text-muted-foreground {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* ---------------------------------------------------------------
+   Fleet map — theme-aware Leaflet popups/tooltips, custom bus
+   markers, and a quiet tiled-map credit (the built-in Leaflet
+   attribution control is hidden below).
+   --------------------------------------------------------------- */
+.fleet-map .leaflet-container {
+  font-family: "Poppins", sans-serif;
+  background: hsl(var(--muted) / 0.6);
+}
+
+/* Popup chrome follows the app theme (light + dark). */
+.fleet-map .leaflet-popup-content-wrapper {
+  background: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) + 4px);
+  box-shadow: 0 6px 24px rgb(0 0 0 / 0.22);
+}
+.fleet-map .leaflet-popup-tip {
+  background: hsl(var(--popover));
+  border: 1px solid hsl(var(--border));
+}
+.fleet-map .leaflet-popup-content {
+  margin: 12px 14px;
+  line-height: 1.45;
+}
+.fleet-map .leaflet-container a.leaflet-popup-close-button {
+  color: hsl(var(--muted-foreground));
+}
+
+/* Bus tooltip (hover card) follows the theme. */
+.fleet-map .leaflet-tooltip.fleet-bus-tooltip {
+  background: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) + 2px);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.18);
+  padding: 4px 9px;
+}
+.fleet-map .leaflet-tooltip-top.fleet-bus-tooltip::before {
+  border-top-color: hsl(var(--popover));
+}
+
+/* Custom bus div-icons — no default white box or border. */
+.fleet-bus-divicon {
+  background: transparent !important;
+  border: none !important;
+}
+.fleet-bus-marker {
+  position: relative;
+  width: 56px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+}
+.fleet-bus-marker svg {
+  display: block;
+  filter: drop-shadow(0 3px 3px rgb(0 0 0 / 0.35));
+  transition: transform 0.2s ease;
+}
+.fleet-bus-marker.is-selected svg {
+  transform: scale(1.18);
+}
+.fleet-bus-selected {
+  position: absolute;
+  inset: -5px;
+  border: 3px solid hsl(var(--primary));
+  border-radius: 28px;
+  background: hsl(var(--primary) / 0.16);
+  pointer-events: none;
+}
+.fleet-bus-pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  opacity: 0;
+  animation: fleet-bus-pulse 1.8s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes fleet-bus-pulse {
+  0% {
+    transform: scale(0.55);
+    opacity: 0.75;
+  }
+  70%,
+  100% {
+    transform: scale(1.1);
+    opacity: 0;
+  }
+}
+.fleet-bus-dot {
+  position: absolute;
+  top: 1px;
+  right: 0;
+  width: 11px;
+  height: 11px;
+  border-radius: 9999px;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.45);
+  pointer-events: none;
+}
+
+/* Attribution: the Leaflet control is hidden; <FleetMap/> renders a tiny
+   tiled-map credit so the OpenStreetMap tile licence stays satisfied. */
+.fleet-map .leaflet-control-attribution {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fleet-bus-pulse {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Driver workspace — status pulses and live progress.
+   The same reduced-motion guard applies: decorative animation is dropped.
+--------------------------------------------------------------------------- */
+.driver-pulse-live {
+  animation: driver-pulse-live 2s ease-out infinite;
+}
+@keyframes driver-pulse-live {
+  0% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  70%,
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+.driver-pulse-stale {
+  animation: driver-pulse-stale 1.6s ease-in-out infinite;
+}
+@keyframes driver-pulse-stale {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.driver-progress-live {
+  background-size: 200% 100%;
+  animation: driver-progress-sheen 2.6s linear infinite;
+}
+@keyframes driver-progress-sheen {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+.driver-alert-enter {
+  animation: driver-alert-enter 0.25s ease-out both;
+}
+@keyframes driver-alert-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .driver-pulse-live,
+  .driver-pulse-stale,
+  .driver-progress-live,
+  .driver-alert-enter {
+    animation: none;
+  }
+  .driver-pulse-live {
+    opacity: 1;
+  }
+}

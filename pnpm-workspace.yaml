@@ -1,0 +1,11 @@
+packages:
+  - client
+  - server
+
+# pnpm refuses to run dependency lifecycle scripts unless they are allow-listed.
+# Prisma needs to download its query engine, esbuild powers tsx (server) and vite (client).
+allowBuilds:
+  "@prisma/client": true
+  "@prisma/engines": true
+  prisma: true
+  esbuild: true

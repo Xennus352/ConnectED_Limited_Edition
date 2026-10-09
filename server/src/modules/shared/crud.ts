@@ -1,0 +1,237 @@
+import { Request, Router } from "express";
+
+import { prisma } from "../../config/prisma";
+import { asyncHandler } from "../../lib/async-handler";
+import { badRequest, notFound } from "../../lib/errors";
+import { buildWhere, isObjectId, readPagination } from "../../lib/query";
+import type { RelationFilter } from "../../lib/query";
+import { mapDoc, stripSecrets } from "../../lib/serialize";
+import { WriteOptions, buildData } from "../../lib/write";
+
+export interface CrudOptions {
+  /** Prisma client delegate, e.g. "student" or "class". */
+  delegate: string;
+  /** Relations expanded before the response is sent. */
+  include?: Record<string, any>;
+  /** Fields scanned by `?search=`. */
+  searchable?: string[];
+  /** query parameter -> scalar relation field, e.g. { class: "classId" }. */
+  relationFilters?: Record<string, RelationFilter>;
+  /** request body key -> scalar relation field, e.g. { teacher: "teacherId" }. */
+  relationInputs?: Record<string, string>;
+  /** Many relations: name -> Prisma operation. */
+  manyRelations?: Record<string, "set" | "connect">;
+  /** Whether the model exposes a `status`. */
+  statusField?: boolean;
+  /** Column driven by startDate / dueDate / date. */
+  dateField?: string;
+  /** Extra query parameters -> scalar fields. */
+  extraFilters?: Record<string, string>;
+  /** Routes such as GET /lessons/class/:classId. */
+  relatedRoutes?: Array<{ path: string; param: string; field: string }>;
+  /** Last chance to extend the where clause for resource specific params. */
+  postWhere?: (
+    where: Record<string, any>,
+    query: Record<string, any>
+  ) => void;
+  dates?: string[];
+  lists?: string[];
+  orderBy?: Record<string, "asc" | "desc">;
+  /** Skip create / update / delete (attendances, rooms, ...). */
+  readOnly?: boolean;
+  /** Extra routes registered before `GET /:id`. */
+  extraRoutes?: (router: Router) => void;
+  /** Hook run before a create/update payload is persisted. */
+  beforeWrite?: (
+    data: Record<string, any>,
+    mode: "create" | "update",
+    req: Request
+  ) => Record<string, any> | Promise<Record<string, any>>;
+  /** Hook used to resolve polymorphic fields after the read. */
+  resolve?: (doc: any) => Promise<any> | any;
+  /** Remove password hashes from the payload. */
+  stripSecrets?: boolean;
+}
+
+export const crudRouter = (options: CrudOptions): Router => {
+  const router = Router();
+
+  const {
+    delegate,
+    include,
+    searchable = [],
+    relationFilters = {},
+    relationInputs = {},
+    manyRelations = {},
+    statusField = false,
+    dateField,
+    extraFilters = {},
+    relatedRoutes = [],
+    postWhere,
+    dates = [],
+    lists = [],
+    orderBy = { createdAt: "desc" },
+    readOnly = false,
+    beforeWrite,
+    resolve,
+    stripSecrets: shouldStrip = false,
+  } = options;
+
+  const model: any = (prisma as any)[delegate];
+  if (!model) {
+    throw new Error(`Unknown Prisma delegate "${delegate}"`);
+  }
+
+  const writeOptions: WriteOptions = {
+    relations: relationInputs,
+    manyRelations,
+    dates,
+    lists,
+    ignore: ["_id", "id", "createdAt", "updatedAt", "__v"],
+  };
+
+  const present = async (doc: any) => {
+    const output = shouldStrip ? stripSecrets(doc) : doc;
+    const shaped = mapDoc(output);
+    return resolve ? await resolve(shaped) : shaped;
+  };
+
+  /** GET / */
+  const list = asyncHandler(async (req, res) => {
+    const where = buildWhere({
+      query: req.query as Record<string, any>,
+      searchable,
+      relationFilters,
+      statusField,
+      dateField,
+      extra: extraFilters,
+    });
+
+    // A teacher only sees their own lessons on the timetable widgets.
+    if (delegate === "lesson" && req.query.user) {
+      const user = req.query.user as Record<string, any>;
+      if (user?.role === "teacher" && isObjectId(user?._id)) {
+        where.teacherId = user._id;
+      }
+    }
+
+    postWhere?.(where, req.query as Record<string, any>);
+
+    const { paginate, limit, skip, page } = readPagination(
+      req.query as Record<string, any>
+    );
+
+    const [rows, total] = await Promise.all([
+      model.findMany({
+        where,
+        include,
+        orderBy,
+        ...(paginate ? { take: limit, skip } : {}),
+      }),
+      model.count({ where }),
+    ]);
+
+    const data = await Promise.all(rows.map(present));
+
+    res.json({
+      success: true,
+      data,
+      meta: {
+        total,
+        skip: paginate ? skip : 0,
+        limit: paginate ? limit : data.length,
+        page,
+      },
+    });
+  });
+
+  /** GET /:id */
+  const getOne = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    if (!isObjectId(id)) throw notFound("Resource not found");
+
+    const doc = await model.findUnique({ where: { id }, include });
+    if (!doc) throw notFound("Resource not found");
+
+    res.json({ success: true, data: await present(doc) });
+  });
+
+  /** POST /create */
+  const create = asyncHandler(async (req, res) => {
+    let data = buildData(req.body, writeOptions, "create");
+    if (beforeWrite) data = await beforeWrite(data, "create", req);
+
+    const doc = await model.create({ data, include });
+    res.json({ success: true, data: await present(doc) });
+  });
+
+  /** PUT /:id */
+  const update = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    if (!isObjectId(id)) throw notFound("Resource not found");
+
+    let data = buildData(req.body, writeOptions, "update");
+    if (beforeWrite) data = await beforeWrite(data, "update", req);
+
+    if (!Object.keys(data).length) {
+      const existing = await model.findUnique({ where: { id }, include });
+      if (!existing) throw notFound("Resource not found");
+      res.json({ success: true, data: await present(existing) });
+      return;
+    }
+
+    const doc = await model.update({ where: { id }, data, include });
+    res.json({ success: true, data: await present(doc) });
+  });
+
+  /** DELETE /:id */
+  const remove = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    if (!isObjectId(id)) throw notFound("Resource not found");
+
+    const existing = await model.findUnique({ where: { id } });
+    if (!existing) throw notFound("Resource not found");
+
+    const doc = await model.delete({ where: { id } });
+    res.json({ success: true, data: await present(doc) });
+  });
+
+  const readOnlyGuard = asyncHandler(async () => {
+    throw badRequest("This resource is read-only");
+  });
+
+  for (const related of relatedRoutes) {
+    router.get(
+      related.path,
+      asyncHandler(async (req, res) => {
+        const value = req.params[related.param];
+        const where: Record<string, any> = isObjectId(value)
+          ? { [related.field]: value }
+          : { [related.field]: { in: [] } };
+
+        postWhere?.(where, req.query as Record<string, any>);
+
+        const rows = await model.findMany({ where, include, orderBy });
+        const data = await Promise.all(rows.map(present));
+
+        res.json({
+          success: true,
+          data,
+          meta: { total: data.length, skip: 0, limit: data.length, page: 1 },
+        });
+      })
+    );
+  }
+
+  options.extraRoutes?.(router);
+
+  router.get("/", list);
+  router.post("/create", readOnly ? readOnlyGuard : create);
+  router.get("/:id", getOne);
+  router.put("/:id", readOnly ? readOnlyGuard : update);
+  router.delete("/:id", readOnly ? readOnlyGuard : remove);
+
+  return router;
+};
+
+export default crudRouter;

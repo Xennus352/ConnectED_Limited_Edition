@@ -1,0 +1,1 @@
+export { default as DeleteRoom } from "./delete-room";

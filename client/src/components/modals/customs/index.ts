@@ -1,0 +1,12 @@
+export { default as UserFormModal } from "./UserFormModal";
+export { default as ExamFormModal } from "./ExamFormModal";
+export { default as ClassFormModal } from "./ClassFormModal";
+export { default as RoomFormModal } from "./RoomFormModal";
+export { default as EventFormModal } from "./EventFormModal";
+export { default as ResultFormModal } from "./ResultFormModal";
+export { default as LessonFormModal } from "./LessonFormModal";
+export { default as BookDetailsModal } from "./BookDetailsModal";
+export { default as SubjectFormModal } from "./SubjectFormModal";
+export { default as AssignmentFormModal } from "./AssignmentFormModal";
+export { default as AnnouncementFormModal } from "./AnnouncementFormModal";
+export { default as FleetFormModal } from "./FleetFormModal";
