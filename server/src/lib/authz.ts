@@ -3,6 +3,20 @@ import { Request } from "express";
 import { prisma } from "../config/prisma";
 import { forbidden } from "./errors";
 
+/**
+ * Composes an authorization guard into a `where` object without clobbering
+ * same-key filters the client may have sent (e.g. `?class=X` on
+ * `/students`). buildWhere produces top-level keys; scope guards must AND
+ * with them rather than replace them, or a teacher asking for one class
+ * would silently receive their whole scope.
+ */
+export const pushScope = (
+  where: Record<string, any>,
+  guard: Record<string, any>
+): void => {
+  where.AND = [...(where.AND ?? []), guard];
+};
+
 /** Roles allowed to manage academic records. */
 export const STAFF_ROLES = ["admin", "super-admin", "teacher"] as const;
 
@@ -77,9 +91,8 @@ export const teacherClassIds = async (
 
 /**
  * Convenience: scopes a class filter to a teacher's authorized classes.
- * When the client already asked for a specific class the filter is replaced
- * wholesale — asking for a class outside the scope simply matches nothing
- * instead of leaking its records.
+ * Composes via AND with whatever the client asked for — asking for a class
+ * outside the scope matches nothing instead of leaking its records.
  */
 export const scopeClassesForTeacher = async (
   req: Request,
@@ -87,11 +100,7 @@ export const scopeClassesForTeacher = async (
 ): Promise<void> => {
   if (req.user?.role !== "teacher") return;
   const scope = await teacherClassIds(req.user.id);
-  if (!scope.size) {
-    where.id = { in: [] };
-    return;
-  }
-  where.id = { in: [...scope] };
+  pushScope(where, { id: { in: [...scope] } });
 };
 
 /**

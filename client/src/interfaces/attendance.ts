@@ -8,6 +8,7 @@ export interface IAttendance {
   present: boolean;
   late: boolean;
   minutesLate: number;
+  studentId?: string;
   student: IStudent;
   lesson: ILesson;
   class: IClass;

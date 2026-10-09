@@ -8,6 +8,7 @@ import {
   ADMIN_ROLES,
   STAFF_ROLES,
   assertTeacherClass,
+  pushScope,
   teacherClassIds,
 } from "../../lib/authz";
 import { crudRouter } from "../shared/crud";
@@ -123,7 +124,7 @@ const scopeLessonsForTeacher = async (
   const scope = await teacherClassIds(req.user.id);
   const guard: Record<string, any>[] = [{ teacherId: req.user.id }];
   if (scope.size) guard.push({ classId: { in: [...scope] } });
-  where.AND = [{ OR: guard }];
+  where.AND = [...(where.AND ?? []), { OR: guard }];
 };
 
 /** A lesson id must belong to the teacher's authorized set. */
@@ -162,7 +163,7 @@ const scopeByLessonForTeacher = async (
     where: { OR: guard },
     select: { id: true },
   });
-  where.lessonId = { in: lessons.map((l) => l.id) };
+  pushScope(where, { lessonId: { in: lessons.map((l) => l.id) } });
 };
 
 // ---------------------------------------------------------------------------
@@ -181,7 +182,7 @@ export const classesRouter = crudRouter({
     readScope: async (req, where) => {
       if (req.user?.role !== "teacher") return;
       const scope = await teacherClassIds(req.user.id);
-      where.id = { in: [...scope] };
+      pushScope(where, { id: { in: [...scope] } });
     },
   },
 });

@@ -15,9 +15,9 @@ i18n
     },
     backend: {
       // `?rev=` busts any stale i18next/HTTP caches so newly added
-      // translation keys (e.g. driver_form.*, the fleet panel/action/errors
-      // blocks) are picked up on reload.
-      loadPath: "/locale/{{lng}}/{{ns}}.json?rev=7",
+      // translation keys (e.g. driver_form.*, teacher_dashboard.*, the
+      // fleet/attendance blocks) are picked up on reload.
+      loadPath: "/locale/{{lng}}/{{ns}}.json?rev=8",
     },
     detection: {
       order: [

@@ -8,7 +8,13 @@ import { isObjectId } from "../../lib/query";
 import { mapDoc, stripSecrets } from "../../lib/serialize";
 import { buildData, idOf, WriteOptions } from "../../lib/write";
 import { crudRouter } from "../shared/crud";
-import { ADMIN_ROLES, STAFF_ROLES, assertAdmin, teacherClassIds } from "../../lib/authz";
+import {
+  ADMIN_ROLES,
+  STAFF_ROLES,
+  assertAdmin,
+  pushScope,
+  teacherClassIds,
+} from "../../lib/authz";
 
 /** Hashes the incoming password and never lets an empty one through. */
 const withPassword = async (
@@ -45,7 +51,7 @@ const peopleAuthz = {
 const studentReadScope = async (req: any, where: Record<string, any>) => {
   if (req.user?.role !== "teacher") return;
   const scope = await teacherClassIds(req.user.id);
-  where.classId = { in: [...scope] };
+  pushScope(where, { classId: { in: [...scope] } });
 };
 
 /**
@@ -62,7 +68,7 @@ const parentReadScope = async (req: any, where: Record<string, any>) => {
   const parentIds = students
     .map((s) => s.parentId)
     .filter((id): id is string => Boolean(id));
-  where.id = { in: parentIds };
+  pushScope(where, { id: { in: parentIds } });
 };
 
 /**

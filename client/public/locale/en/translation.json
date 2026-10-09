@@ -612,7 +612,7 @@
   },
   "locale": {
     "en": "English",
-    "mm": "\u1019\u103c\u1014\u103a\u1019\u102c"
+    "mm": "မြန်မာ"
   },
   "app_sidebar": {
     "dashboard": "Dashboard",
@@ -734,19 +734,19 @@
     "title": "Messages",
     "new_chat": "New chat",
     "new_chat_hint": "Pick someone to message. They must accept your request before you can chat.",
-    "search_placeholder": "Search people\u2026",
-    "first_message_placeholder": "Write a short message\u2026",
+    "search_placeholder": "Search people…",
+    "first_message_placeholder": "Write a short message…",
     "send_request": "Send request",
     "empty": "No conversations yet.\nStart a new chat to reach out.",
     "unknown_user": "Unknown user",
     "incoming_request": "Message request",
-    "waiting_acceptance": "Waiting for acceptance\u2026",
+    "waiting_acceptance": "Waiting for acceptance…",
     "no_messages": "No messages",
     "select_conversation": "Select a conversation\nto start chatting",
     "gate_hint": "Accept this request to start chatting.",
     "chat_active": "Chatting",
     "no_messages_yet": "No messages yet",
-    "type_message": "Type a message\u2026",
+    "type_message": "Type a message…",
     "send": "Send",
     "accept": "Accept",
     "decline": "Decline",
@@ -768,8 +768,8 @@
     "read": "Read",
     "sent": "Sent",
     "remove_attachment": "Remove attachment",
-    "typing": "typing\u2026",
-    "uploading": "Uploading\u2026",
+    "typing": "typing…",
+    "uploading": "Uploading…",
     "you_prefix": "You: "
   },
   "notifications": {
@@ -780,7 +780,7 @@
     "new_request": "Message request",
     "request_body": "Wants to start chatting with you",
     "accepted": "Request accepted",
-    "accepted_body": "Accepted your request \u2014 say hi!"
+    "accepted_body": "Accepted your request — say hi!"
   },
   "banned": {
     "banned": "Banned",
@@ -804,7 +804,7 @@
     "oneDay": "1 day ago",
     "headerTitle": "Live Bus Tracker",
     "headerSubtitle": "Follow your children's buses in real time.",
-    "statusLive": "\u2022 LIVE",
+    "statusLive": "• LIVE",
     "statusUpdating": "Updating",
     "statusStale": "Last known location",
     "statusOffline": "Offline",
@@ -830,10 +830,10 @@
     "route": "Route",
     "driver": "Driver",
     "errorLoading": "Failed to load fleet data",
-    "loadingFleet": "Loading live buses\u2026",
+    "loadingFleet": "Loading live buses…",
     "noActiveTrips": "No active trips",
     "panel": {
-      "search": "Search buses\u2026",
+      "search": "Search buses…",
       "no_route": "No route assigned",
       "riders": "{{count}} riders"
     },
@@ -843,7 +843,7 @@
       "no_matches": "No buses match your search"
     },
     "connection": {
-      "lost": "Live connection lost \u2014 showing last known positions"
+      "lost": "Live connection lost — showing last known positions"
     },
     "action": {
       "follow": "Follow",
@@ -995,7 +995,7 @@
     "isActive": "Active route",
     "stops": "Stops",
     "add_stop": "Add stop",
-    "no_stops": "No stops yet \u2014 add boarding stops for this route.",
+    "no_stops": "No stops yet — add boarding stops for this route.",
     "stop_name": "Stop name",
     "stop_arrival": "Arrival",
     "edit_route": "Edit Route",
@@ -1213,7 +1213,7 @@
     "latitude": "Latitude",
     "longitude": "Longitude",
     "use_gps": "Use my GPS",
-    "sending": "Sending\u2026",
+    "sending": "Sending…",
     "broadcast": "Broadcast",
     "broadcast_note": "Broadcasts are validated server-side and distributed live to subscribed viewers.",
     "invalid_coords": "Invalid coordinates",
@@ -1353,7 +1353,7 @@
     "gps": "GPS",
     "trip": "Trips",
     "maintenance": "Maintenance",
-    "incident": "Incidents",
+    "incident": "Incident: {{type}}",
     "system": "System",
     "no_alerts": "No alerts",
     "no_alerts_desc": "Nothing needs your attention right now.",
@@ -1378,7 +1378,6 @@
     "trip_in_progress_desc": "{{route}} is running now.",
     "trip_completed": "Trip completed",
     "trip_completed_desc": "{{route}} was completed successfully.",
-    "incident": "Incident: {{type}}",
     "incident_desc": "{{details}}"
   },
   "driver_profile": {
@@ -1413,5 +1412,65 @@
     "reset_title": "Reset preferences",
     "reset_desc": "Restore the default driver settings.",
     "reset": "Reset"
+  },
+  "teacher_dashboard": {
+    "good_morning": "Good morning",
+    "good_afternoon": "Good afternoon",
+    "good_evening": "Good evening",
+    "classes_today": "Classes today",
+    "completed_today": "Completed today",
+    "exams_coming": "Upcoming exams",
+    "assignments_active": "Active assignments",
+    "unread_messages": "Unread messages",
+    "todays_classes": "Today's classes",
+    "no_classes_today": "No classes scheduled today. Enjoy the break!",
+    "weekly_workload": "Weekly workload",
+    "no_workload": "No lessons scheduled yet this week.",
+    "upcoming_exams": "Upcoming exams",
+    "no_exams": "No upcoming exams.",
+    "assignments_due": "Assignments due",
+    "no_assignments": "Nothing due right now.",
+    "pending_announcements": "Pending announcements",
+    "no_pending_announcements": "Nothing awaiting approval.",
+    "new_lesson": "Schedule lesson",
+    "new_exam": "Prepare exam",
+    "new_assignment": "Give assignment",
+    "take_attendance": "Take attendance",
+    "view_all": "View all",
+    "role_teacher": "Teacher",
+    "profile_status": "Status: {{status}}",
+    "profile_read_only_note": "Your profile is maintained by the school administration. To update your details, contact an administrator.",
+    "next_class": "Next class"
+  },
+  "attendance_class": {
+    "page_title": "Class attendance",
+    "unknown_class": "Class",
+    "date": "Date",
+    "lesson": "Lesson",
+    "all_lessons": "All lessons",
+    "search_student": "Search students…",
+    "mark_all_present": "All present",
+    "mark_all_late": "All late",
+    "mark_all_absent": "All absent",
+    "present": "Present",
+    "late": "Late",
+    "absent": "Absent",
+    "minutes_late": "Minutes late",
+    "roster_title": "Students",
+    "legend": "Tap a state to mark each student",
+    "no_students": "No students are enrolled in this class.",
+    "load_failed": "Could not load the class roster.",
+    "retry": "Try again",
+    "no_matches": "No students match your search.",
+    "unsaved_changes": "You have unsaved changes",
+    "no_changes_yet": "Nothing to save",
+    "discard": "Discard",
+    "save_changes": "Save attendance",
+    "saving": "Saving…",
+    "saved_successfully": "Attendance saved.",
+    "save_failed": "Could not save attendance.",
+    "partial_saved": "Saved {{applied}} record(s). {{skipped}} student(s) could not be saved.",
+    "gender_male": "Male",
+    "gender_female": "Female"
   }
 }

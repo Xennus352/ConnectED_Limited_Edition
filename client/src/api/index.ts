@@ -32,7 +32,11 @@ const createAxiosInstance = (token: string | null, signOut: () => void) => {
   instance.interceptors.response.use(
     (response) => response, // Return response directly
     (error) => {
-      if (error?.response?.status === 401 || error?.response?.status === 403) {
+      // A 401 means the session is dead (expired/revoked) → sign out. A 403
+      // is a *permission denial* — the session is fine, the user just tried
+      // something their role is not allowed to do. Logging them out for that
+      // would be a hostile UX and would hide the error the UI wants to toast.
+      if (error?.response?.status === 401) {
         signOut(); // Automatically log the user out on unauthorized error
       }
       return Promise.reject(error);

@@ -10,6 +10,7 @@ import {
   STAFF_ROLES,
   assertStaff,
   assertTeacherClass,
+  pushScope,
   teacherClassIds,
 } from "../../lib/authz";
 import { crudRouter } from "../shared/crud";
@@ -182,15 +183,15 @@ export const resultsRouter = crudRouter({
       if (!uid) return;
       if (role === "teacher") {
         const scope = await teacherClassIds(uid);
-        where.classId = { in: [...scope] };
+        pushScope(where, { classId: { in: [...scope] } });
       } else if (role === "student") {
-        where.studentId = uid;
+        pushScope(where, { studentId: uid });
       } else if (role === "parent") {
         const children = await prisma.student.findMany({
           where: { parentId: uid },
           select: { id: true },
         });
-        where.studentId = { in: children.map((c) => c.id) };
+        pushScope(where, { studentId: { in: children.map((c) => c.id) } });
       }
     },
     readOneScope: resultReadOneScope,
@@ -285,7 +286,7 @@ export const attendancesRouter = crudRouter({
     readScope: async (req, where) => {
       if (req.user?.role !== "teacher") return;
       const scope = await teacherClassIds(req.user.id);
-      where.classId = { in: [...scope] };
+      pushScope(where, { classId: { in: [...scope] } });
     },
     writeScope: async (req, mode, target) => {
       if (req.user?.role !== "teacher") return;
