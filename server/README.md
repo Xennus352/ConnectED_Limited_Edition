@@ -63,8 +63,8 @@ Banned accounts:
 
 | Method | Path | Notes |
 | --- | --- | --- |
-| GET | `/users/banned` | Admin / super-admin only (403 otherwise). Every banned user across all four models. `data` items are full mapped docs + a `model` field (`"Admin"`, `"Teacher"`, `"Student"`, `"Parent"`) |
-| PUT | `/users/:id/ban` | Admin / super-admin only. Resolves the id across all four models (404 when unknown). Sets `isBanned: true`, emits `user:banned` to the user's live sockets |
+| GET | `/users/banned` | Admin / super-admin only (403 otherwise). Every banned user across all five models. `data` items are full mapped docs + a `model` field (`"Admin"`, `"Teacher"`, `"Student"`, `"Parent"`, `"Driver"`) |
+| PUT | `/users/:id/ban` | Admin / super-admin only. Resolves the id across all five models (404 when unknown). Sets `isBanned: true`, emits `user:banned` to the user's live sockets |
 | PUT | `/users/:id/unban` | Same, sets `isBanned: false` |
 | GET | `/users/directory?q=&limit=` | Any signed-in user. Up to 20 users across all models matching `q` in `fullName` / `username` (empty `q` → first 20), **excluding the caller**. Items: `{ _id, fullName, username, profilePhoto, role, model }` |
 
@@ -117,9 +117,9 @@ Each resource serves the same five routes:
 | PUT | `/<resource>/:id` | Partial update — only the keys you send are touched |
 | DELETE | `/<resource>/:id` | Delete |
 
-Resources: `admins`, `teachers`, `students`, `parents`, `classes`, `rooms`,
-`subjects`, `lessons`, `exams`, `assignments`, `results`, `attendances`,
-`announcements`, `events`.
+Resources: `admins`, `teachers`, `students`, `parents`, `drivers`, `classes`,
+`rooms`, `subjects`, `lessons`, `exams`, `assignments`, `results`,
+`attendances`, `announcements`, `events`.
 
 Related routes (also used by the client):
 
@@ -173,10 +173,10 @@ expanded into documents by `resolve` before the response is written:
   returned as `createdBy`.
 - **Conversation / Message** (`Conversation`, `Message`) model the chat.
   `Conversation.participantIds` holds exactly two ids that can belong to any of
-  the four user models, so participants are resolved across the models on read
+  the five user models, so participants are resolved across the models on read
   (`server/src/lib/users.ts`) and returned as `participants`. Deleting a
   conversation removes its messages explicitly in the route.
-- Bans are a plain `isBanned Boolean @default(false)` on all four user models.
+- Bans are a plain `isBanned Boolean @default(false)` on all five user models.
 - **`Student.classId`** → returned as a populated `class` object.
 - Lesson `startTime`/`endTime` sent as `HH:MM` (an `input[type=time]` value)
   become today's date at that wall-clock time; full ISO strings keep their
@@ -194,13 +194,20 @@ expanded into documents by `resolve` before the response is written:
 | `JWT_SECRET` | dev secret | HS256 signing key — change in production |
 | `JWT_EXPIRES_IN` | `7d` | Token lifetime |
 | `CLIENT_ORIGINS` | `http://localhost:5173` | CORS allow-list, comma separated |
+| `PUBLIC_URL` | `http://localhost:8000` | Base URL for generated links (uploads) |
+| `FLEET_SIMULATION_ENABLED` | `true` | Demo GPS simulator; set `false` in production |
+
+See `.env.example` for the full list (map tile and location-freshness settings).
 
 ## Seed accounts
 
 | Role | Username | Password |
 | --- | --- | --- |
-| Super admin | `superadmin` | `Admin@123` |
-| Admin | `admin` | `Admin@123` |
-| Teacher | `teacher` / `teacher1`…`teacher5` | `Teacher@123` |
-| Student | `student` / `student1`…`student23` | `Student@123` |
-| Parent | `parent` / `parent1`…`parent5` | `Parent@123` |
+| Super admin | `superadmin` | `SuperAdmin@123` |
+| Admin | `admin`, `admin2` | `Admin@123` |
+| Teacher | `teacher`, `teacher1`…`teacher5` | `Teacher@123` |
+| Student | `student`, `student1`…`student11` | `Student@123` |
+| Parent | `parent`, `parent1`…`parent5` | `Parent@123` |
+| Driver | `driver`, `driver1`…`driver3` | `Driver@123` |
+
+> Demo credentials only — rotate or remove them before any real deployment.

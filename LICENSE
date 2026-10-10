@@ -1,0 +1,76 @@
+# ConnectED — Proprietary Software License Notice
+
+Copyright (c) 2026 IT Lens. All rights reserved.
+
+> **Status: DRAFT TEMPLATE — NOT LEGAL ADVICE.**
+> This file is a proposed proprietary license notice, not a completed or
+> lawyer-reviewed legal instrument. Replace every `[PLACEHOLDER]` and have
+> qualified counsel in the relevant jurisdiction review it before you rely on
+> it or distribute the software. See `COMMERCIAL_LICENSE.md` for the fuller
+> license template and open questions, and `THIRD_PARTY_NOTICES.md` for
+> third-party components that this notice does **not** cover.
+
+ConnectED (the "Software") is **proprietary software owned by
+IT Lens** ("the Owner"). It is **not** open-source software and is
+**not** licensed for public use, copying, modification, or redistribution.
+
+## 1. Grant
+
+No license, express or implied, is granted by possession of, access to, or
+reference to this repository. Use of the Software is permitted **only** under a
+separate, signed written agreement between the Owner and the licensee (for
+example, the template in `COMMERCIAL_LICENSE.md`), and only:
+
+- by the **authorized school or organization** named in that agreement;
+- for the **number of schools and campuses** stated in that agreement;
+- for the **term** stated in that agreement;
+- strictly in accordance with that agreement's terms.
+
+## 2. Restrictions
+
+Except as expressly permitted in a signed agreement, no person may:
+
+1. copy, distribute, sublicense, sell, rent, lease, or otherwise make the
+   Software available to any third party;
+2. modify, adapt, translate, or create derivative works of the Software;
+3. reverse engineer, decompile, or disassemble the Software, except to the
+   extent such restriction is prohibited by applicable law;
+4. remove or alter any copyright, trademark, or attribution notice;
+5. use the Software to provide a commercial service to third parties
+   (including hosting it for other schools) without a separate agreement.
+
+## 3. Third-party components
+
+The Software includes third-party open-source and other components that are
+licensed separately by their respective authors. Those components remain under
+their own licenses, and the Owner claims no ownership of them. See
+`THIRD_PARTY_NOTICES.md`. Nothing in this notice overrides a third-party
+license, and nothing in a third-party license grants rights to the Owner's own
+code.
+
+## 4. Ownership and contributions
+
+The Owner asserts copyright in the ConnectED codebase. **This assertion is
+subject to verification:** the Owner must confirm that it holds or has secured
+the rights to all contributions, assets, designs, and content in the
+repository before representing ownership or granting commercial licenses. See
+`COMMERCIAL_LICENSE.md` §"Ownership verification".
+
+## 5. Warranty disclaimer
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT. [SUBJECT TO
+APPLICABLE LAW.]
+
+## 6. Limitation of liability
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE OWNER SHALL NOT BE
+LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE
+DAMAGES, OR ANY LOSS OF DATA, PROFITS, OR GOODWILL, ARISING FROM USE OF THE
+SOFTWARE. [SUBJECT TO APPLICABLE LAW.]
+
+## 7. Contact
+
+Licensing and commercial enquiries: @kazue352 — xennus.dev@gmail.com.
+Website: https://soemoekyaw-portfolio.netlify.app/.
