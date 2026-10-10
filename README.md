@@ -16,6 +16,15 @@ sees exactly the workspace built for it.
 > **Built for the way modern schools work.** ConnectED helps a school organize
 > information, coordinate people, and keep families informed from one place.
 
+> **Development status (October 2026):** ConnectED is an **independent project
+> developed by a university student** under the **planned brand name "IT Lens"**.
+> IT Lens is **not a registered company**, and ConnectED is **not yet
+> commercially available**. The commercial, licensing, and privacy documents in
+> this repository are **drafts prepared for future commercial use** — not current
+> offers. Official contact details and an official product website are not yet
+> established (placeholders are marked throughout — see
+> [`docs/PLACEHOLDERS.md`](docs/PLACEHOLDERS.md)).
+
 ---
 
 ## Table of contents
@@ -164,8 +173,11 @@ Recommended set (see `docs/SALES_PREPARATION.md` for the full checklist):
 
 ## Demo
 
-There is **no hosted public demo**. A **local demonstration** can be run from
-this repository in a few minutes using the bundled seed data.
+**Interested in ConnectED for your school? Contact us to request a demonstration
+or early access — [CONTACT EMAIL].**
+
+There is **no hosted public demo** yet. A **local demonstration** can be run
+from this repository in a few minutes using the bundled seed data.
 
 ### Run the local demo
 
@@ -328,6 +340,11 @@ ConnectED is **proprietary software**. It is not open source, and no public
 license is granted by this repository. Use is permitted only under a separately
 signed commercial agreement.
 
+**ConnectED is not yet commercially available and no commercial license is
+currently offered for purchase.** The documents below are **drafts prepared for
+future commercial use**. They do not represent a registered company: **IT Lens is
+a planned brand/project name only, not an incorporated legal entity.**
+
 - [`LICENSE`](LICENSE) — proprietary license notice (draft).
 - [`COMMERCIAL_LICENSE.md`](COMMERCIAL_LICENSE.md) — commercial license template
   and proposed offerings (single-school, multi-campus, enterprise, hosted,
@@ -350,9 +367,14 @@ A school can request:
 - **training and onboarding**, and
 - **ongoing support and maintenance**.
 
-Contact: **@kazue352** — **xennus.dev@gmail.com** ·
-Website: **https://soemoekyaw-portfolio.netlify.app/** · Product name: **IT Lens** ·
-Demo: **not available yet** (a local demo can be run from this repository).
+**Interested in ConnectED for your school? Contact us to request a
+demonstration or early access.**
+
+- **Contact:** [CONTACT EMAIL] *(interim: @kazue352 on Telegram)*
+- **Planned brand:** IT Lens — a project/brand name only, **not a registered
+  company**
+- **Official website:** [OFFICIAL CONNECTED WEBSITE — NOT YET AVAILABLE]
+- **Public demo:** Not available yet
 
 See [`docs/SALES_PREPARATION.md`](docs/SALES_PREPARATION.md) for the internal
 sales process and screenshot checklist.
@@ -362,7 +384,8 @@ sales process and screenshot checklist.
 ## FAQ
 
 **Is ConnectED open source?**
-No. It is proprietary software, licensed commercially.
+No. It is proprietary software. Commercial licensing documents are drafts
+prepared for future use; no license is currently available for purchase.
 
 **Can one deployment serve multiple schools?**
 Not today. The platform is single-tenant; each school should run its own
@@ -391,7 +414,9 @@ policy is a draft requiring legal and operational review.
 
 ## Project status & known limitations
 
-ConnectED is an actively developed platform. Honest current limitations:
+ConnectED is an **independent project developed by a university student** under
+the **planned brand name "IT Lens"** (not a registered company). It is **in
+development and not yet commercially available**. Honest current limitations:
 
 - **Single-tenant:** no school/organization isolation yet — one deployment per
   school.
@@ -421,10 +446,14 @@ preliminary audit and the items needing review.
 
 ## Contact
 
-- **Business / licensing:** IT Lens — xennus.dev@gmail.com
-- **Website:** https://soemoekyaw-portfolio.netlify.app/
-- **Commercial contact:** @kazue352
-- **Demo:** Not available yet — run the local demo from this repository.
+- **Project:** ConnectED — developed under the planned brand name **IT Lens**
+  _(IT Lens is a project/brand name only and is **not a registered company**)_.
+- **Contact:** [CONTACT EMAIL] *(interim: @kazue352 on Telegram)*
+- **Official website:** [OFFICIAL CONNECTED WEBSITE — NOT YET AVAILABLE]
+- **Public demo:** Not available yet.
+- **Licensing:** Draft documents only — ConnectED is not yet commercially
+  available. See [`COMMERCIAL_LICENSE.md`](COMMERCIAL_LICENSE.md) and
+  [`docs/PLACEHOLDERS.md`](docs/PLACEHOLDERS.md).
 
-*(Business details supplied by IT Lens. The legal templates elsewhere in this
-repository remain drafts requiring professional legal review.)*
+*(The commercial and legal documents in this repository are drafts prepared for
+future use, not current offers, and require professional legal review.)*

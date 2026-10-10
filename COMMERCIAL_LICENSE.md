@@ -6,6 +6,10 @@
 > questions. It has **not** been reviewed by a lawyer and must not be presented
 > to a customer as a final agreement until it is. Replace all placeholders, and
 > have qualified counsel in the relevant jurisdiction review and finalize it.
+>
+> **Draft for future commercial use. No commercial license is currently
+> available for purchase, and no agreement has been legally approved. "IT Lens"
+> is a planned brand/project name only — not a registered company.**
 
 Last drafted: 2026-10-10 · Intended model: **retain ownership, license use to
 private schools** (see "Business model" below).
@@ -14,16 +18,18 @@ private schools** (see "Business model" below).
 
 ## 1. Parties
 
-- **Licensor ("the Owner"):** IT Lens, registered at
-  [REGISTERED ADDRESS], contact @kazue352 / xennus.dev@gmail.com.
+- **Licensor ("the Owner"):** [CONTRACTING PARTY LEGAL NAME — TO BE FINALIZED],
+  at [REGISTERED ADDRESS — TO BE FINALIZED], contact @kazue352 /
+  [CONTACT EMAIL]. The Owner develops the software under the **planned brand
+  name "IT Lens"** (a project/brand name only — **not a registered company**).
 - **Licensee ("the School"):** [SCHOOL / ORGANIZATION LEGAL NAME], registered at
   [SCHOOL ADDRESS], contact [SCHOOL CONTACT].
 
 ## 2. Product
 
-"ConnectED" — the school management software described at
-https://soemoekyaw-portfolio.netlify.app/, in the version delivered under this
-agreement (the "Software").
+"ConnectED" — the school management software delivered to the Licensee under
+this agreement (the "Software"). Official product website:
+[OFFICIAL CONNECTED WEBSITE — NOT YET AVAILABLE].
 
 ## 3. Business model (proposed — confirm before use)
 

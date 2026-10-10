@@ -6,9 +6,15 @@
 > lawyer in the relevant jurisdiction and adapted to your actual business
 > model, hosting arrangement, and the laws where your schools operate, before
 > it is published or relied upon.
+>
+> **Draft for future commercial use only. The service is not currently offered,
+> no agreement has been legally approved, and "IT Lens" is a planned brand name
+> only — not a registered company.**
 
 Effective date: `[EFFECTIVE DATE]` · Last updated: 2026-10-10 · Provider:
-IT Lens ("we", "us", "Provider").
+[CONTRACTING PARTY LEGAL NAME — TO BE FINALIZED] ("we", "us", "Provider"),
+developing the service under the planned brand name **IT Lens** (a project/brand
+name only — **not a registered company**).
 
 ---
 
@@ -183,8 +189,8 @@ The Provider may update these Terms. Material changes will be notified with
 
 ## 21. Contact
 
-IT Lens · xennus.dev@gmail.com · https://soemoekyaw-portfolio.netlify.app/ ·
-@kazue352.
+IT Lens (planned brand) · [CONTACT EMAIL] · [OFFICIAL CONNECTED WEBSITE — NOT
+YET AVAILABLE] · @kazue352.
 
 ---
 

@@ -4,26 +4,33 @@
 > `README.md`. It contains **placeholders** — fill them in before sharing
 > anything externally. **Never invent** testimonials, school counts, statistics,
 > certifications, awards, integrations, URLs, or contact details.
+>
+> **IT Lens is a planned brand/project name only — not a registered company.**
+> ConnectED is **not yet commercially available**; the contact, website, and demo
+> details below are not yet established. See
+> [`PLACEHOLDERS.md`](PLACEHOLDERS.md) for the full list.
 
 Last updated: 2026-10-10.
 
 ---
 
-## 1. Business details
+## 1. Business details & placeholders
 
-| Detail | Value |
-| --- | --- |
-| Business / trading name | IT Lens |
-| Contracting entity | IT Lens _[confirm the exact legal entity]_ |
-| Sales / support email | xennus.dev@gmail.com |
-| Product website | https://soemoekyaw-portfolio.netlify.app/ |
-| Commercial contact | @kazue352 (Telegram) |
-| Phone | _[optional — add one if you want]_ |
-| Registered address | _[add if applicable]_ |
-| Demo URL | **None yet** — local demo only (see the product README) |
+| Detail | Current value | Replace when |
+| --- | --- | --- |
+| Product name | ConnectED | — |
+| Planned brand | **IT Lens** — project/brand name only, **not a registered company** | You decide whether to formalize a brand/company |
+| Contracting party (legal name) | `[CONTRACTING PARTY LEGAL NAME — TO BE FINALIZED]` | You register a business or choose the contracting entity |
+| Contact email | `[CONTACT EMAIL]` | You establish an official contact |
+| Official website | `[OFFICIAL CONNECTED WEBSITE — NOT YET AVAILABLE]` | You obtain a dedicated domain |
+| Interim contact | @kazue352 (Telegram) | You establish official contact details |
+| Registered address | `[REGISTERED ADDRESS — TO BE FINALIZED]` | You have a registered address |
+| Phone (optional) | `[CONTACT PHONE — OPTIONAL]` | Optional |
+| Demo URL | **None yet** — local demo only | A safe, hosted demo exists (no real student data) |
 
-> Do **not** publish a demo URL until a working, hosted, safe-to-share demo
-> exists (with no real student data).
+> Do **not** publish a contact email, website, or demo URL until they are real
+> and official. Do **not** describe IT Lens as a registered company until it is
+> one.
 
 ---
 
@@ -42,9 +49,11 @@ Last updated: 2026-10-10.
 
 ### Contact template
 
-> To request a demonstration or discuss licensing, contact
-> **@kazue352** at **xennus.dev@gmail.com** —
-> **https://soemoekyaw-portfolio.netlify.app/**.
+> **Interested in ConnectED for your school? Contact us to request a
+> demonstration or early access.**
+>
+> Email: **[CONTACT EMAIL]** · Interim: @kazue352 (Telegram) · Official website:
+> [OFFICIAL CONNECTED WEBSITE — NOT YET AVAILABLE].
 
 ---
 

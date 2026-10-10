@@ -7,9 +7,14 @@
 > described protections are fully implemented. Every claim here must be verified
 > against the specific deployment and reviewed by qualified counsel before
 > publication. Do not publish this policy as-is.
+>
+> **Draft for future commercial use only. No deployment is currently offered,
+> and "IT Lens" is a planned brand name only — not a registered company.**
 
-Effective date: `[EFFECTIVE DATE]` · Controller/Provider: IT Lens ·
-Contact: xennus.dev@gmail.com.
+Effective date: `[EFFECTIVE DATE]` · Controller/Provider:
+[CONTRACTING PARTY LEGAL NAME — TO BE FINALIZED] (developing the software under
+the planned brand name **IT Lens** — a project/brand name only, **not a
+registered company**) · Contact: [CONTACT EMAIL].
 
 ---
 
@@ -168,7 +173,7 @@ control, rate limiting, and formal monitoring. See the audit and
 ## 12. Requests from data subjects or guardians
 
 Requests (access, correction, deletion, objection) should be directed to the
-School as controller, and forwarded to `xennus.dev@gmail.com` as needed. Process
+School as controller, and forwarded to `[CONTACT EMAIL]` as needed. Process
 and response timelines: `[DEFINE]`.
 
 ## 13. Legal bases and applicable law
@@ -182,7 +187,7 @@ notices, and consents.**
 ## 14. Changes and contact
 
 Material changes will be notified per `[PROCESS]`. Questions:
-xennus.dev@gmail.com / https://soemoekyaw-portfolio.netlify.app/.
+[CONTACT EMAIL] / [OFFICIAL CONNECTED WEBSITE — NOT YET AVAILABLE].
 
 ---
 
