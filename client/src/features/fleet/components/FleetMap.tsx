@@ -13,6 +13,8 @@ import type { FleetBus, MapFocus } from "../types";
 /** Taungoo — used only until the server snapshot supplies map config. */
 const FALLBACK_CENTER: [number, number] = [18.94, 96.43];
 const FALLBACK_ZOOM = 13;
+const FALLBACK_TILES = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+const FALLBACK_ATTRIBUTION = "&copy; OpenStreetMap contributors";
 
 interface FleetMapProps {
   buses: FleetBus[];
@@ -55,13 +57,11 @@ const FleetMap: React.FC<FleetMapProps> = ({
         zoomControl={true}
         preferCanvas={false}
       >
-        {meta ? (
-          <TileLayer
-            key={meta.map.tileUrl}
-            url={meta.map.tileUrl}
-            attribution={meta.map.tileAttribution}
-          />
-        ) : null}
+        <TileLayer
+          key={mapConfig?.tileUrl || FALLBACK_TILES}
+          url={mapConfig?.tileUrl || FALLBACK_TILES}
+          attribution={mapConfig?.tileAttribution || FALLBACK_ATTRIBUTION}
+        />
 
         <MapController
           buses={located}
@@ -88,7 +88,7 @@ const FleetMap: React.FC<FleetMapProps> = ({
       {/* Tiny tiled-map credit — replaces the hidden Leaflet attribution control
           so the OpenStreetMap tile licence stays satisfied. */}
       <span className='pointer-events-none absolute bottom-1 left-1/2 z-[1000] -translate-x-1/2 whitespace-nowrap rounded-full bg-black/50 px-2.5 py-0.5 text-[10px] font-medium text-white/80'>
-        © OpenStreetMap
+        © OpenStreetMap contributors
       </span>
 
       {/* Loading overlay when no data yet */}

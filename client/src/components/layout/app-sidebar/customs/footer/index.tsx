@@ -1,8 +1,9 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { LogOut, Settings, User } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
+import useSignOut from "react-auth-kit/hooks/useSignOut";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -20,6 +21,16 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { TUser } from "@/interfaces/user";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const initialsOf = (name?: string): string =>
   (name || "?")
@@ -39,6 +50,9 @@ const SidebarFooterComponent: React.FC = () => {
   const { t } = useTranslation();
   const user = useAuthUser<TUser>() as TUser | null;
   const { state, isMobile } = useSidebar();
+  const [logoutOpen, setLogoutOpen] = useState(false);
+  const signOut = useSignOut();
+  const navigate = useNavigate();
   const collapsed = state === "collapsed" && !isMobile;
 
   const roleLabel = user?.role ? t(`role.${user.role}`) : "";
@@ -120,14 +134,26 @@ const SidebarFooterComponent: React.FC = () => {
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem asChild>
-            <Link to='/logout'>
-              <LogOut className='mr-2 size-4' strokeWidth={1.8} />
-              {t("app_sidebar.logout")}
-            </Link>
+          <DropdownMenuItem onSelect={(event) => { event.preventDefault(); setLogoutOpen(true); }}>
+            <LogOut className='mr-2 size-4' strokeWidth={1.8} />
+            {t("app_sidebar.logout")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      <AlertDialog open={logoutOpen} onOpenChange={setLogoutOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("logout.title", "Are you sure you want to log out?")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("logout.description", "Logging out will end your current session. Please confirm if you wish to proceed.")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("button.cancel", "Cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { signOut(); navigate("/auth/sign-in", { replace: true }); }} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {t("button.confirm", "Confirm")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </SidebarFooter>
   );
 };

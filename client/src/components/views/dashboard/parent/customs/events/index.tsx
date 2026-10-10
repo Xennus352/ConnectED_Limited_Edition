@@ -15,10 +15,11 @@ const Events: React.FC = () => {
       return <div>Loading...</div>;
     }
 
-    const events = data?.data?.map((event: IEvent) => ({
+    const events = data?.data?.slice(0, 3).map((event: IEvent) => ({
       _id: event._id,
       name: event.name,
       description: event.description,
+      class: event.class,
       startDate: new Date(event.startDate),
       endDate: new Date(event.endDate),
     }))

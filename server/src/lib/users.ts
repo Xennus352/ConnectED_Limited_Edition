@@ -9,15 +9,13 @@ import { mapDoc, stripSecrets } from "./serialize";
  * Admin, Teacher, Student and Parent in turn. Every cross-model lookup in the
  * API goes through this module.
  */
-export const USER_MODELS: AuthModel[] = ["Admin", "Teacher", "Student", "Parent"];
+export const USER_MODELS: AuthModel[] = ["Admin", "Teacher", "Student", "Parent", "Driver"];
 
 export const USER_DELEGATES: Record<AuthModel, any> = {
   Admin: prisma.admin,
   Teacher: prisma.teacher,
   Student: prisma.student,
   Parent: prisma.parent,
-  // Drivers authenticate too, but are deliberately NOT part of USER_MODELS:
-  // they are not offered in the chat directory.
   Driver: prisma.driver,
 };
 

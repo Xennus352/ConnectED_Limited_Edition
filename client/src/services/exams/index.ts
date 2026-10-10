@@ -50,6 +50,7 @@ export const useExamService = () => {
     page?: number;
     search?: string;
     lesson?: string;
+    childId?: string;
   } = {
     limit: getLimit(),
     page: getPage(),
@@ -64,6 +65,9 @@ export const useExamService = () => {
   if (lesson) {
     params.lesson = lesson;
   }
+
+  const childId = searchParams.get("childId");
+  if (childId) params.childId = childId;
 
   const getAllExams = useQueryHandler({
     queryKey: ["exams", params],

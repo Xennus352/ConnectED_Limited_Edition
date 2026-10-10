@@ -1,9 +1,10 @@
-import { Request } from "express";
+import { Request, Router } from "express";
 
 import { prisma } from "../../config/prisma";
 import { badRequest, forbidden } from "../../lib/errors";
-import { isObjectId } from "../../lib/query";
+import { isObjectId, toDate } from "../../lib/query";
 import { mapDoc } from "../../lib/serialize";
+import { asyncHandler } from "../../lib/async-handler";
 import {
   ADMIN_ROLES,
   STAFF_ROLES,
@@ -12,6 +13,51 @@ import {
   teacherClassIds,
 } from "../../lib/authz";
 import { crudRouter } from "../shared/crud";
+
+const yangonDayStart = (now = new Date()): Date => {
+  const parts = new Intl.DateTimeFormat("en-US", { timeZone: "Asia/Yangon", year: "numeric", month: "numeric", day: "numeric" }).formatToParts(now);
+  const part = (type: string) => Number(parts.find((item) => item.type === type)?.value);
+  return new Date(Date.UTC(part("year"), part("month") - 1, part("day")) - 6.5 * 60 * 60 * 1000);
+};
+
+const applyAfterDateFilter = (where: Record<string, any>, query: Record<string, any>, key: string, field: string) => {
+  const raw = query[key];
+  if (raw === undefined) return;
+  const parsed = toDate(raw);
+  if (!parsed) throw badRequest(`A valid ${key} date is required`);
+  where[field] = { ...(where[field] ?? {}), gte: yangonDayStart(parsed) };
+};
+
+export const studentDashboardRouter = Router();
+studentDashboardRouter.get("/dashboard-summary", asyncHandler(async (req, res) => {
+  if (req.user?.role?.toLowerCase?.() !== "student") throw forbidden("Student access required");
+  const student = await prisma.student.findUnique({ where: { id: req.user.id }, select: { classId: true } });
+  if (!student) throw forbidden("Student record not found");
+
+  const now = new Date();
+  const weekday = new Intl.DateTimeFormat("en-US", { weekday: "long", timeZone: "Asia/Yangon" }).format(now).toUpperCase();
+  const dayStart = yangonDayStart(now);
+  const [todayLessons, attendanceTotal, presentTotal, lessonRows] = await Promise.all([
+    student.classId ? prisma.lesson.count({ where: { classId: student.classId, day: weekday, status: { notIn: ["cancelled", "CANCELLED"] } } }) : Promise.resolve(0),
+    prisma.attendance.count({ where: { studentId: req.user.id } }),
+    prisma.attendance.count({ where: { studentId: req.user.id, present: true } }),
+    student.classId ? prisma.lesson.findMany({ where: { classId: student.classId }, select: { id: true } }) : Promise.resolve([]),
+  ]);
+  const lessonIds = lessonRows.map((lesson) => lesson.id);
+  const [upcomingExams, upcomingAssignments] = lessonIds.length ? await Promise.all([
+    prisma.exam.count({ where: { lessonId: { in: lessonIds }, startTime: { gte: dayStart } } }),
+    prisma.assignment.count({ where: { lessonId: { in: lessonIds }, dueDate: { gte: dayStart } } }),
+  ]) : [0, 0];
+
+  res.json({ success: true, data: {
+    todayLessons,
+    upcomingExams,
+    upcomingAssignments,
+    attendanceRate: attendanceTotal ? Math.round((presentTotal / attendanceTotal) * 100) : null,
+    attendanceRecords: attendanceTotal,
+    timezone: "Asia/Yangon",
+  } });
+}));
 
 const classSummary = { select: { id: true, name: true, capacity: true } };
 const personSummary = {
@@ -127,6 +173,39 @@ const scopeLessonsForTeacher = async (
   where.AND = [...(where.AND ?? []), { OR: guard }];
 };
 
+const scopeLessonsForParent = async (req: any, where: Record<string, any>) => {
+  if (req.user?.role !== "parent") return;
+  const classIds = await parentClassIds(req.user.id);
+  pushScope(where, { classId: { in: classIds } });
+};
+
+/** Student identity is the authenticated Student record id. Never accept a class id from the client. */
+const studentClassIds = async (studentId: string): Promise<string[]> => {
+  const student = await prisma.student.findUnique({ where: { id: studentId }, select: { classId: true } });
+  return student?.classId ? [student.classId] : [];
+};
+
+const scopeLessonsForStudent = async (req: any, where: Record<string, any>) => {
+  if (req.user?.role !== "student") return;
+  const classIds = await studentClassIds(req.user.id);
+  pushScope(where, { classId: { in: classIds } });
+};
+
+const assertLessonReadAccess = async (req: any, doc: Record<string, any>) => {
+  const role = req.user?.role;
+  if (role === "student") {
+    const classIds = await studentClassIds(req.user.id);
+    if (!doc.classId || !classIds.includes(String(doc.classId))) throw forbidden("You do not have access to this lesson");
+  } else if (role === "parent") {
+    const classIds = await parentClassIds(req.user.id);
+    if (!doc.classId || !classIds.includes(String(doc.classId))) throw forbidden("You do not have access to this lesson");
+  } else if (role === "teacher") {
+    if (doc.teacherId === req.user.id) return;
+    const classIds = await teacherClassIds(req.user.id);
+    if (!doc.classId || !classIds.has(String(doc.classId))) throw forbidden("You do not have access to this lesson");
+  }
+};
+
 /** A lesson id must belong to the teacher's authorized set. */
 const assertTeacherLesson = async (
   req: any,
@@ -164,6 +243,51 @@ const scopeByLessonForTeacher = async (
     select: { id: true },
   });
   pushScope(where, { lessonId: { in: lessons.map((l) => l.id) } });
+};
+
+const parentClassIds = async (parentId: string, childId?: string): Promise<string[]> => {
+  if (childId && !isObjectId(childId)) return [];
+  const children = await prisma.student.findMany({
+    where: { parentId, ...(childId ? { id: childId } : {}) },
+    select: { classId: true },
+  });
+  return [...new Set(children.map((child) => child.classId).filter((id): id is string => Boolean(id)))];
+};
+
+/** Parent academic feeds are limited to lessons in their children's classes. */
+const scopeAcademicForParent = async (req: any, where: Record<string, any>) => {
+  if (req.user?.role !== "parent") return;
+  const classIds = await parentClassIds(req.user.id, String(req.query?.childId ?? "") || undefined);
+  const lessons = classIds.length
+    ? await prisma.lesson.findMany({ where: { classId: { in: classIds } }, select: { id: true } })
+    : [];
+  pushScope(where, { lessonId: { in: lessons.map((lesson) => lesson.id) } });
+};
+
+const scopeAcademicForStudent = async (req: any, where: Record<string, any>) => {
+  if (req.user?.role !== "student") return;
+  const classIds = await studentClassIds(req.user.id);
+  const lessons = classIds.length
+    ? await prisma.lesson.findMany({ where: { classId: { in: classIds } }, select: { id: true } })
+    : [];
+  pushScope(where, { lessonId: { in: lessons.map((lesson) => lesson.id) } });
+};
+
+const assertParentAcademicItem = async (req: any, doc: Record<string, any>) => {
+  if (req.user?.role === "student") {
+    if (!doc.lessonId) throw forbidden("You do not have access to this item");
+    const lesson = await prisma.lesson.findUnique({ where: { id: String(doc.lessonId) }, select: { classId: true } });
+    const classIds = await studentClassIds(req.user.id);
+    if (!lesson?.classId || !classIds.includes(lesson.classId)) throw forbidden("You do not have access to this item");
+    return;
+  }
+  if (req.user?.role !== "parent") return;
+  if (!doc.lessonId) throw forbidden("You do not have access to this item");
+  const lesson = await prisma.lesson.findUnique({ where: { id: String(doc.lessonId) }, select: { classId: true } });
+  const classIds = await parentClassIds(req.user.id);
+  if (!lesson?.classId || !classIds.includes(lesson.classId)) {
+    throw forbidden("You do not have access to this item");
+  }
 };
 
 // ---------------------------------------------------------------------------
@@ -235,6 +359,7 @@ export const lessonsRouter = crudRouter({
   include: {
     subject: { select: { id: true, name: true } },
     class: classSummary,
+    room: { select: { id: true, name: true } },
     teacher: { select: { id: true, fullName: true, profilePhoto: true } },
   },
   searchable: ["name", "day"],
@@ -255,9 +380,14 @@ export const lessonsRouter = crudRouter({
     { path: "/teacher/:teacherId", param: "teacherId", field: "teacherId" },
   ],
   authz: {
-    readRoles: STAFF_ROLES,
+    readRoles: [...STAFF_ROLES, "parent", "student"],
     writeRoles: STAFF_ROLES,
-    readScope: scopeLessonsForTeacher,
+    readScope: async (req, where) => {
+      await scopeLessonsForTeacher(req, where);
+      await scopeLessonsForParent(req, where);
+      await scopeLessonsForStudent(req, where);
+    },
+    readOneScope: assertLessonReadAccess,
     writeScope: async (req, mode, target, payload) => {
       if (req.user?.role !== "teacher") return;
 
@@ -296,7 +426,15 @@ export const examsRouter = crudRouter({
   delegate: "exam",
   include: {
     lesson: {
-      select: { id: true, name: true, day: true, startTime: true, endTime: true },
+      select: {
+        id: true,
+        name: true,
+        day: true,
+        startTime: true,
+        endTime: true,
+        subject: { select: { id: true, name: true } },
+        class: { select: { id: true, name: true } },
+      },
     },
   },
   searchable: ["name"],
@@ -304,10 +442,17 @@ export const examsRouter = crudRouter({
   relationInputs: { lesson: "lessonId" },
   dates: ["startTime", "endTime"],
   dateField: "startTime",
+  postWhere: (where, query) => applyAfterDateFilter(where, query, "startsAfter", "startTime"),
   orderBy: { startTime: "desc" },
   authz: {
+    readRoles: [...STAFF_ROLES, "parent", "student"],
     writeRoles: STAFF_ROLES,
-    readScope: scopeByLessonForTeacher,
+    readScope: async (req, where) => {
+      await scopeByLessonForTeacher(req, where);
+      await scopeAcademicForParent(req, where);
+      await scopeAcademicForStudent(req, where);
+    },
+    readOneScope: assertParentAcademicItem,
     writeScope: async (req, mode, target, payload) => {
       if (req.user?.role !== "teacher") return;
       if (mode === "delete") {
@@ -326,7 +471,15 @@ export const assignmentsRouter = crudRouter({
   delegate: "assignment",
   include: {
     lesson: {
-      select: { id: true, name: true, day: true, startTime: true, endTime: true },
+      select: {
+        id: true,
+        name: true,
+        day: true,
+        startTime: true,
+        endTime: true,
+        subject: { select: { id: true, name: true } },
+        class: { select: { id: true, name: true } },
+      },
     },
   },
   searchable: ["name"],
@@ -334,10 +487,17 @@ export const assignmentsRouter = crudRouter({
   relationInputs: { lesson: "lessonId" },
   dates: ["startDate", "dueDate"],
   dateField: "startDate",
+  postWhere: (where, query) => applyAfterDateFilter(where, query, "dueAfter", "dueDate"),
   orderBy: { startDate: "desc" },
   authz: {
+    readRoles: [...STAFF_ROLES, "parent", "student"],
     writeRoles: STAFF_ROLES,
-    readScope: scopeByLessonForTeacher,
+    readScope: async (req, where) => {
+      await scopeByLessonForTeacher(req, where);
+      await scopeAcademicForParent(req, where);
+      await scopeAcademicForStudent(req, where);
+    },
+    readOneScope: assertParentAcademicItem,
     writeScope: async (req, mode, target, payload) => {
       if (req.user?.role !== "teacher") return;
       if (mode === "delete") {

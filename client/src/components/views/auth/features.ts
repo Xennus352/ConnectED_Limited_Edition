@@ -77,12 +77,10 @@ const useAuthFeatures = () => {
       const body = {
         username: values.username,
         password: values.password,
-        ...(values.rememberMe && { sessionType: "rememberMe" }),
+        rememberMe: values.rememberMe,
       };
 
       const { success, data, message } = await signInService(body);
-
-      console.log(message, "message");
 
       if (success && data?.token) {
         const { token, user } = data;

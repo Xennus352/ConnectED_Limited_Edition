@@ -172,6 +172,13 @@ const useSidebarMenu = () => {
               visible: STAFF_ROLES,
             },
             {
+              _id: "student-timetable",
+              href: "/student/timetable",
+              label: t("app_sidebar.my_timetable", "My timetable"),
+              icon: CalendarDays,
+              visible: ["student"],
+            },
+            {
               _id: "exams",
               href: "/list/exams",
               label: t("app_sidebar.exams"),
@@ -218,7 +225,7 @@ const useSidebarMenu = () => {
           _id: "transport-group",
           label: t("app_sidebar.transport"),
           icon: BusFront,
-          visible: ["super-admin", "admin", "parent", "driver"],
+          visible: ["super-admin", "admin", "parent", "driver", "student"],
           children: [
             // Admin / super-admin — fleet administration, Live Fleet first.
             {
@@ -317,10 +324,10 @@ const useSidebarMenu = () => {
               visible: ["driver"],
             },
             {
-              _id: "driver-stops",
-              href: "/driver/stops",
-              label: t("app_sidebar.driver_stops"),
-              icon: MapPin,
+              _id: "rider-management",
+              href: "/driver/rider-management",
+              label: t("app_sidebar.rider_management"),
+              icon: Users,
               visible: ["driver"],
             },
             {
@@ -352,6 +359,13 @@ const useSidebarMenu = () => {
               visible: ["driver"],
             },
             // Parent — child bus tracking.
+            {
+              _id: "student-transport",
+              href: "/student/transport",
+              label: t("app_sidebar.my_transport", "My transport"),
+              icon: MapPinned,
+              visible: ["student"],
+            },
             {
               _id: "bus-tracking",
               href: "/parent/bus-tracking",

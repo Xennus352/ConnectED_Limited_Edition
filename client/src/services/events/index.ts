@@ -65,6 +65,7 @@ export const useEventsService = () => {
     startDate?: string;
     dueDate?: string;
     date?: string;
+    childId?: string;
   } = {
     limit: getLimit(),
     page: getPage(),
@@ -94,6 +95,9 @@ export const useEventsService = () => {
   if (date) {
     params.date = date;
   }
+
+  const childId = searchParams.get("childId");
+  if (childId) params.childId = childId;
 
   const getAllEvents = useQueryHandler({
     queryKey: ["events", params],

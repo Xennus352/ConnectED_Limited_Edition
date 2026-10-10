@@ -65,6 +65,7 @@ export const useResultService = () => {
     startDate?: string;
     dueDate?: string;
     type?: string;
+    childId?: string;
   } = {
     limit: getLimit(),
     page: getPage(),
@@ -94,6 +95,9 @@ export const useResultService = () => {
   if (dueDate) {
     params.dueDate = dueDate;
   }
+
+  const childId = searchParams.get("childId");
+  if (childId) params.childId = childId;
 
   const getAllResults = useQueryHandler({
     queryKey: ["results", params],

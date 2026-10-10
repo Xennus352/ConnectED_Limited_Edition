@@ -23,6 +23,14 @@ const teacherIncludes = {
   primaryClass: { select: { id: true, name: true } },
 };
 
+const parentIncludes = {
+  children: {
+    include: {
+      class: { select: { id: true, name: true, capacity: true } },
+    },
+  },
+};
+
 // Drivers need their assigned bus + route on /driver/location immediately.
 const driverIncludes = {
   bus: {
@@ -46,6 +54,7 @@ const driverIncludes = {
 const includesFor = (model: AuthModel) => {
   if (model === "Student") return studentIncludes;
   if (model === "Teacher") return teacherIncludes;
+  if (model === "Parent") return parentIncludes;
   if (model === "Driver") return driverIncludes;
   return undefined;
 };
@@ -94,7 +103,10 @@ export const signIn = asyncHandler(async (req, res) => {
     model.toLowerCase()
   ].findUnique({ where: { id: found.id }, include: includesFor(model) });
 
-  const token = signToken({ sub: user.id, role: user.role, model });
+  const token = signToken(
+    { sub: user.id, role: user.role, model },
+    req.body?.rememberMe === true
+  );
 
   res.json({
     success: true,

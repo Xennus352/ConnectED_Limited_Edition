@@ -74,9 +74,13 @@ const authorizedBusIds = async (
     return [...busIds];
   }
 
-  // Students / teachers get no fleet telemetry by default.
   if (role === "student") {
-    return [];
+    const assignment = await prisma.busStudentAssignment.findFirst({
+      where: { studentId: userId, isActive: true },
+      orderBy: { assignedAt: "desc" },
+      select: { busId: true },
+    });
+    return assignment?.busId ? [assignment.busId] : [];
   }
 
   // Teachers get no fleet telemetry by default.
@@ -313,19 +317,28 @@ export const setupSockets = (ioServer: Server): void => {
     }
 
     /**
-     * Typing relay: the client knows the recipient id, so no DB lookup is
-     * needed on every keystroke — we just forward to that user's room.
-     * Payload: { conversationId, toUserId, isTyping }
+     * Typing only flows over an accepted conversation shared by both users.
+     * Client supplied recipient ids are never sufficient authorization.
      */
     socket.on(
       "typing",
-      (payload: { conversationId?: string; toUserId?: string; isTyping?: boolean }) => {
+      async (payload: { conversationId?: string; toUserId?: string; isTyping?: boolean }) => {
         const toUserId = payload?.toUserId;
-        if (!toUserId || toUserId === userId || typeof payload?.conversationId !== "string") {
+        const conversationId = payload?.conversationId;
+        if (!toUserId || toUserId === userId || typeof conversationId !== "string" || !/^[a-f\d]{24}$/i.test(conversationId)) {
+          return;
+        }
+        try {
+          const conversation = await prisma.conversation.findUnique({
+            where: { id: conversationId },
+            select: { participantIds: true, status: true },
+          });
+          if (conversation?.status !== "accepted" || !conversation.participantIds.includes(userId) || !conversation.participantIds.includes(toUserId)) return;
+        } catch {
           return;
         }
         emitToUser(toUserId, "typing", {
-          conversationId: payload.conversationId,
+          conversationId,
           userId,
           isTyping: Boolean(payload.isTyping),
         });

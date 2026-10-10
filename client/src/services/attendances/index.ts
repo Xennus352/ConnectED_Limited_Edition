@@ -62,6 +62,7 @@ export const useAttendancesService = () => {
     lesson?: string;
     startDate?: string;
     dueDate?: string;
+    childId?: string;
   } = {
     limit: getLimit(),
     page: getPage(),
@@ -91,6 +92,9 @@ export const useAttendancesService = () => {
   if (dueDate) {
     params.dueDate = dueDate;
   }
+
+  const childId = searchParams.get("childId");
+  if (childId) params.childId = childId;
 
   const getAllAttendances = useQueryHandler({
     queryKey: ["attendances", params],

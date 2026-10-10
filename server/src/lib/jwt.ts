@@ -9,9 +9,9 @@ export interface TokenPayload {
   model: AuthModel;
 }
 
-export const signToken = (payload: TokenPayload): string =>
+export const signToken = (payload: TokenPayload, rememberMe = false): string =>
   jwt.sign(payload, config.jwtSecret, {
-    expiresIn: config.jwtExpiresIn as jwt.SignOptions["expiresIn"],
+    expiresIn: (rememberMe ? "30d" : config.jwtExpiresIn) as jwt.SignOptions["expiresIn"],
   });
 
 export const verifyToken = (token: string): TokenPayload =>

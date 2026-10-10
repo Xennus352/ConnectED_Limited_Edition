@@ -26,13 +26,13 @@ const AddBtn: React.FC<{ loading?: boolean }> = ({ loading }) => {
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        <CustomTooltip title={t("attendance_form.add-attendance")}>
+      <CustomTooltip title={t("attendance_form.add-attendance")}>
+        <PopoverTrigger asChild>
           <button disabled={loading}>
             <CirclePlus className='w-7 md:w-8 h-7 md:h-8 active:scale-95 cursor-pointer' />
           </button>
-        </CustomTooltip>
-      </PopoverTrigger>
+        </PopoverTrigger>
+      </CustomTooltip>
       <PopoverContent className='max-h-[240px] overflow-y-auto w-[160px]'>
         <ul className='flex flex-col gap-2'>
           {isLoading

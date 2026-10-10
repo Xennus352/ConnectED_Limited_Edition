@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { useTranslation } from "react-i18next";
-import { CalendarDays, ChevronRight, MapPinned, Navigation } from "lucide-react";
+import { AlertTriangle, CalendarDays, ChevronRight, Clock3, MapPinned, Navigation, Phone, UsersRound } from "lucide-react";
 
 import { TUser } from "@/interfaces/user";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,7 @@ import EmptyState from "@/components/views/driver/empty-state";
 import { ErrorState } from "@/components/views/driver/error-state";
 import { DashboardSkeleton, TripCardsSkeleton } from "@/components/views/driver/skeletons";
 import { buildDriverAlerts } from "@/components/views/driver/alerts";
+import { IncidentReportDialog } from "@/components/views/driver/incident-report";
 import type { RouteProgress } from "@/lib/driver-geo";
 
 const greeting = (hour: number): string =>
@@ -33,6 +34,7 @@ const DriverDashboardPage: React.FC = () => {
   const user = useAuthUser<TUser>() as TUser | null;
   const workspace = useDriverWorkspace();
   const root = useGsapReveal<HTMLDivElement>();
+  const [incidentOpen, setIncidentOpen] = React.useState(false);
 
   const now = new Date();
   const hour = now.getHours();
@@ -67,6 +69,80 @@ const DriverDashboardPage: React.FC = () => {
     : "OFFLINE";
 
   if (loadingBus && loadingTrips) return <DashboardSkeleton />;
+
+  if (workspace.hasAssignedBus && assigned) {
+    const nextStop = geo?.nextStop;
+    const nextRouteStop = assigned.route?.stops?.find((stop: any) => stop.id === nextStop?.id);
+    const scheduledStopTime = focusTrip?.scheduledStartAt && nextRouteStop?.estimatedArrival != null
+      ? new Date(new Date(focusTrip.scheduledStartAt).getTime() + Number(nextRouteStop.estimatedArrival) * 60_000)
+      : null;
+    const dispatchPhone = import.meta.env.VITE_DRIVER_DISPATCH_PHONE as string | undefined;
+
+    return (
+      <div ref={root} className='flex flex-col gap-5'>
+        <header data-gsap='fade-up' className='flex flex-wrap items-end justify-between gap-3'>
+          <div>
+            <h1 className='text-2xl font-bold tracking-tight md:text-3xl'>
+              {t(greeting(hour))}, <span className='text-primary'>{firstName(user?.fullName || "Driver")}</span> 👋
+            </h1>
+            <p className='mt-1 flex items-center gap-1.5 text-sm text-muted-foreground'><CalendarDays className='h-4 w-4' />{now.toLocaleDateString(undefined, { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</p>
+          </div>
+          <span className={`inline-flex items-center gap-2 rounded-full border bg-card px-3 py-2 text-xs font-semibold uppercase tracking-wide ${workspace.onDuty ? "text-emerald-600" : "text-muted-foreground"}`}>
+            <span className={`h-2 w-2 rounded-full ${workspace.onDuty ? "bg-emerald-500" : "bg-muted-foreground"}`} />
+            {workspace.onDuty ? "On duty" : "Off duty"}
+          </span>
+        </header>
+
+        {workspace.snapshot.isError && <ErrorState message={t("driver_dashboard.load_failed")} description={t("driver_dashboard.load_failed_desc")} />}
+
+        <div data-gsap-stagger className='grid min-w-0 gap-4 lg:grid-cols-2'>
+          <section className='space-y-3 rounded-2xl border bg-card p-4 shadow-sm sm:p-5'>
+            <div><h2 className='font-semibold'>Active bus status</h2><p className='text-sm text-muted-foreground'>Vehicle and live GPS status</p></div>
+            <BusStatusCard bus={assigned} status={gpsStatus} tripStatusLabel={tripStatusLabel} lastUpdateLabel={assigned.lastLocationAt ? new Date(assigned.lastLocationAt).toLocaleTimeString() : null} />
+            <div className='flex flex-wrap items-center justify-between gap-3 border-t pt-3 text-sm'>
+              <span className='text-muted-foreground'>{focusTrip?.route?.name ?? "No active route"}</span>
+              <Button size='sm' variant='outline' className='gap-2' asChild><Link to='/driver/map'><MapPinned className='h-4 w-4' />Open live map</Link></Button>
+            </div>
+          </section>
+
+          <section className='rounded-2xl border bg-card p-4 shadow-sm sm:p-5'>
+            <div className='flex items-start justify-between gap-3'><div><h2 className='font-semibold'>Next stop preview</h2><p className='text-sm text-muted-foreground'>Route progress from the latest GPS position</p></div><Navigation className='h-5 w-5 text-primary' /></div>
+            {nextStop ? <div className='mt-5 rounded-xl bg-primary/[0.04] p-4'>
+              <p className='text-xs font-medium uppercase tracking-wide text-muted-foreground'>Stop #{nextStop.sequence ?? ((geo?.currentIndex ?? -1) + 2)}</p>
+              <p className='mt-1 text-lg font-semibold'>{nextStop.name}</p>
+              <div className='mt-4 grid gap-3 sm:grid-cols-2'>
+                <div className='flex items-center gap-2 text-sm'><Clock3 className='h-4 w-4 text-muted-foreground' /><span>{scheduledStopTime && !Number.isNaN(scheduledStopTime.getTime()) ? scheduledStopTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : geo?.etaMinutes != null ? `ETA ${geo.etaMinutes} min` : "Schedule unavailable"}</span></div>
+                <div className='flex items-center gap-2 text-sm'><UsersRound className='h-4 w-4 text-muted-foreground' /><span>{nextRouteStop?.studentCount != null ? `${nextRouteStop.studentCount} riders assigned` : "Rider count unavailable"}</span></div>
+              </div>
+            </div> : <p className='mt-5 rounded-xl border border-dashed p-5 text-sm text-muted-foreground'>{focusTrip ? "No upcoming stop is available for this route." : "Start a trip to see your next stop."}</p>}
+            <Button size='sm' variant='ghost' className='mt-3 gap-1 px-0' asChild><Link to='/driver/route'>View full route <ChevronRight className='h-4 w-4' /></Link></Button>
+          </section>
+
+          <section className='rounded-2xl border bg-card p-4 shadow-sm sm:p-5'>
+            <div className='flex items-center justify-between gap-3'><div><h2 className='font-semibold'>Quick rider manifest</h2><p className='text-sm text-muted-foreground'>Assigned riders on this bus</p></div><span className='rounded-full bg-muted px-2.5 py-1 text-xs font-semibold'>{assigned.students?.length ?? 0}</span></div>
+            {assigned.students?.length ? <div className='mt-4 divide-y rounded-xl border'>{assigned.students.slice(0, 5).map((student: any) => <div key={student.id} className='flex items-center gap-3 p-3'><div className='grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full bg-primary/10 text-xs font-semibold text-primary'>{student.profilePhoto ? <img src={student.profilePhoto} alt='' className='h-full w-full object-cover' /> : student.fullName?.split(/\s+/).map((part: string) => part[0]).slice(0, 2).join("").toUpperCase()}</div><div className='min-w-0 flex-1'><p className='truncate text-sm font-medium'>{student.fullName}</p><p className='text-xs text-muted-foreground'>Assigned rider</p></div></div>)}</div> : <p className='mt-4 rounded-xl border border-dashed p-4 text-sm text-muted-foreground'>No rider names are available for this bus yet.</p>}
+            <Button size='sm' variant='ghost' className='mt-2 gap-1 px-0' asChild><Link to='/driver/rider-management'>Open rider list <ChevronRight className='h-4 w-4' /></Link></Button>
+          </section>
+
+          <section className='rounded-2xl border bg-card p-4 shadow-sm sm:p-5'>
+            <div><h2 className='font-semibold'>Dispatch / quick actions</h2><p className='text-sm text-muted-foreground'>Trip and incident actions</p></div>
+            <div className='mt-4 grid gap-2 sm:grid-cols-2'>
+              {focusTrip ? <TripActions trip={focusTrip} actions={workspace.actions} size='default' /> : <Button disabled className='w-full'>No trip available</Button>}
+              <Button variant='outline' className='w-full gap-2' onClick={() => setIncidentOpen(true)}><AlertTriangle className='h-4 w-4' />Report incident</Button>
+              {dispatchPhone ? <Button variant='outline' className='w-full gap-2 sm:col-span-2' asChild><a href={`tel:${dispatchPhone}`}><Phone className='h-4 w-4' />Call admin dispatch</a></Button> : <div className='sm:col-span-2'><Button variant='outline' className='w-full gap-2' disabled title='Dispatch phone is not configured'><Phone className='h-4 w-4' />Call admin dispatch</Button><p className='mt-1 text-xs text-muted-foreground'>Dispatch phone is not configured for this workspace.</p></div>}
+            </div>
+            {focusTrip?.status === "IN_PROGRESS" && <div className='mt-4'><TripProgress stops={timelineStops} fraction={geo?.fraction ?? 0} active /></div>}
+          </section>
+        </div>
+
+        <section data-gsap='fade-up' className='flex flex-col gap-3'>
+          <div className='flex items-center justify-between'><div><h2 className='text-lg font-semibold'>{t("driver_dashboard.recent_alerts")}</h2><p className='text-sm text-muted-foreground'>Latest route, bus, and incident updates</p></div><Button variant='ghost' size='sm' className='gap-1 text-muted-foreground' asChild><Link to='/driver/alerts'>View all <ChevronRight className='h-4 w-4' /></Link></Button></div>
+          {alerts.length ? <div className='grid gap-2'>{alerts.map((alert) => <Link key={alert.id} to={alert.action === "open-map" ? "/driver/map" : "/driver/alerts"} className='driver-alert-enter flex items-start gap-3 rounded-xl border bg-card p-3.5 shadow-sm transition-colors hover:bg-accent'><span className={`mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg text-xs ${alert.severity === "critical" ? "bg-red-500/10 text-red-600" : alert.severity === "warning" ? "bg-amber-500/10 text-amber-600" : "bg-sky-500/10 text-sky-600"}`}>{alert.category === "INCIDENT" ? "⚠️" : alert.category === "GPS" ? "📡" : "🚌"}</span><div className='min-w-0'><p className='text-sm font-semibold'>{t(alert.titleKey, alert.titleValues)}</p><p className='text-xs text-muted-foreground'>{t(alert.descriptionKey ?? "", alert.descriptionValues)}</p></div><time className='ml-auto shrink-0 text-xs text-muted-foreground'>{new Date(alert.time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</time></Link>)}</div> : <p className='rounded-xl border border-dashed bg-muted/30 px-4 py-8 text-center text-sm text-muted-foreground'>{t("driver_dashboard.no_alerts")}</p>}
+        </section>
+        <IncidentReportDialog open={incidentOpen} onOpenChange={setIncidentOpen} reportIncident={workspace.actions.reportIncident} />
+      </div>
+    );
+  }
 
   return (
     <div ref={root} className='flex flex-col gap-5'>

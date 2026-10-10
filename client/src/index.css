@@ -27,6 +27,29 @@ body {
   min-height: 100vh;
 }
 
+@keyframes parent-rise-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.parent-enter { animation: parent-rise-in 520ms cubic-bezier(.2,.75,.25,1) both; }
+.settings-enter { animation: parent-rise-in 560ms cubic-bezier(.2,.75,.25,1) both; }
+
+html[data-motion="reduce"] *,
+html[data-motion="reduce"] *::before,
+html[data-motion="reduce"] *::after {
+  animation-duration: .01ms !important;
+  animation-iteration-count: 1 !important;
+  scroll-behavior: auto !important;
+  transition-duration: .01ms !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .parent-enter, .settings-enter { animation: none; }
+  .parent-enter *, .parent-enter::before, .parent-enter::after,
+  .settings-enter *, .settings-enter::before, .settings-enter::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}
+
 /* Base text size — 18px for a larger UI.
    Every Tailwind rem-based size (and spacing) scales with it. */
 html {
@@ -614,7 +637,28 @@ html {
   .driver-alert-enter {
     animation: none;
   }
-  .driver-pulse-live {
+.driver-pulse-live {
     opacity: 1;
   }
+}
+@keyframes student-announcement-marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+.student-announcement-track {
+  width: max-content;
+  animation: student-announcement-marquee 36s linear infinite;
+  will-change: transform;
+}
+
+.student-announcement-ticker:hover .student-announcement-track,
+.student-announcement-ticker:focus-within .student-announcement-track,
+.student-announcement-ticker[data-paused="true"] .student-announcement-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .student-announcement-track { animation: none; }
+  .student-announcement-track > [aria-hidden="true"] { display: none; }
 }

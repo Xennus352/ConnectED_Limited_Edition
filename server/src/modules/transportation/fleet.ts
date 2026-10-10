@@ -96,7 +96,8 @@ export const resolveScope = async (req: Request): Promise<FleetScope> => {
     const busId = await resolveDriverBusId(user.id);
     return {
       busIds: busId ? [busId] : [],
-      seesStudentNames: false,
+      // Allow drivers to see student rider names at stops
+      seesStudentNames: true,
       ownStudentIds: [],
     };
   }
@@ -238,7 +239,7 @@ const presentBus = (
         }
       : null,
     driver: bus.driver ?? null,
-    studentCount: assignments.length,
+    studentCount: scope.ownStudentIds.length ? scopedAssignments.length : assignments.length,
     // Names are role-gated: parents only ever get their own children, and a
     // driver (who may not see student information at all) gets an empty list.
     // `pickupStopId` lets the map name the riders waiting at each stop.
@@ -327,6 +328,72 @@ export const getBusTrack = async (req: Request, res: Response) => {
   res.json({
     success: true,
     data: presentBus(bus as unknown as RawBus, scope),
+    meta: snapshotMeta(),
+  });
+};
+
+/** Student transport view: one active assignment belonging to the session student. */
+export const getStudentTransport = async (req: Request, res: Response) => {
+  if (req.user?.role?.toLowerCase?.() !== "student") throw forbidden("Student access required");
+  const studentId = String(req.user.id);
+  const assignment = await prisma.busStudentAssignment.findFirst({
+    where: { studentId, isActive: true },
+    orderBy: { assignedAt: "desc" },
+    include: {
+      pickupStop: true,
+      dropoffStop: true,
+      bus: {
+        include: {
+          ...busInclude,
+          trips: {
+            where: {
+              OR: [
+                { status: { in: ["READY", "BOARDING", "IN_PROGRESS", "DELAYED"] } },
+                { status: "SCHEDULED", scheduledStartAt: { gte: new Date() } },
+              ],
+            },
+            orderBy: { scheduledStartAt: "asc" },
+            take: 1,
+          },
+          boardingEvents: {
+            where: { studentId },
+            orderBy: { occurredAt: "desc" },
+            take: 1,
+            select: { eventType: true, occurredAt: true, stopId: true, tripId: true },
+          },
+        },
+      },
+    },
+  });
+  if (!assignment) {
+    res.json({ success: true, data: null, meta: snapshotMeta() });
+    return;
+  }
+  const bus = assignment.bus;
+  const hasFix = Number.isFinite(bus.currentLatitude) && Number.isFinite(bus.currentLongitude) && !(bus.currentLatitude === 0 && bus.currentLongitude === 0);
+  const trips = bus.trips ?? [];
+  const active = trips[0] ?? null;
+  const latestBoarding = bus.boardingEvents?.[0] ?? null;
+  res.json({
+    success: true,
+    data: {
+      assignment: { pickupStop: assignment.pickupStop, dropoffStop: assignment.dropoffStop },
+      bus: {
+        id: bus.id,
+        busNumber: bus.busNumber,
+        registrationNumber: bus.registrationNumber,
+        status: bus.status,
+        latitude: hasFix ? bus.currentLatitude : null,
+        longitude: hasFix ? bus.currentLongitude : null,
+        speed: bus.currentSpeed,
+        heading: bus.heading,
+        lastLocationAt: bus.lastLocationAt?.toISOString() ?? null,
+        route: bus.route,
+        driver: bus.driver ? { fullName: bus.driver.fullName, profilePhoto: bus.driver.profilePhoto } : null,
+      },
+      trip: active ? { id: active.id, status: active.status, scheduledStartAt: active.scheduledStartAt, actualStartAt: active.actualStartAt, routeId: active.routeId } : null,
+      boarding: latestBoarding ? { eventType: latestBoarding.eventType, occurredAt: latestBoarding.occurredAt, stopId: latestBoarding.stopId, tripId: latestBoarding.tripId } : null,
+    },
     meta: snapshotMeta(),
   });
 };

@@ -71,6 +71,7 @@ export const useAnnouncementsService = () => {
     dueDate?: string;
     class?: string;
     date?: string;
+    childId?: string;
   } = {
     limit: getLimit(),
     page: getPage(),
@@ -105,6 +106,9 @@ export const useAnnouncementsService = () => {
   if (date) {
     params.date = date;
   }
+
+  const childId = searchParams.get("childId");
+  if (childId) params.childId = childId;
 
   const getAllAnnouncements = useQueryHandler({
     queryKey: ["announcements", params],

@@ -18,7 +18,7 @@ export const pushScope = (
 };
 
 /** Roles allowed to manage academic records. */
-export const STAFF_ROLES = ["admin", "super-admin", "teacher"] as const;
+export const STAFF_ROLES = ["admin", "super-admin", "teacher", "driver"] as const;
 
 /** Roles allowed to administer the school (users, rooms, subjects, fleet…). */
 export const ADMIN_ROLES = ["admin", "super-admin"] as const;

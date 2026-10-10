@@ -1,5 +1,5 @@
 import React, { lazy } from "react";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
 
 import AuthPage from "@/pages/auth";
 import RequireAuth from "./require-auth";
@@ -64,10 +64,12 @@ const DriverTripsPage = lazy(() => import("@/pages/driver/trips"))
 const DriverDashboardPage = lazy(() => import("@/pages/driver/dashboard"))
 const DriverMapPage = lazy(() => import("@/pages/driver/map"))
 const DriverRoutePage = lazy(() => import("@/pages/driver/route"))
-const DriverStopsPage = lazy(() => import("@/pages/driver/stops"))
+const RiderManagementPage = lazy(() => import("@/pages/driver/rider-management"))
 const DriverAlertsPage = lazy(() => import("@/pages/driver/alerts"))
 const DriverProfilePageView = lazy(() => import("@/pages/driver/profile"))
 const ParentBusTrackingPage = lazy(() => import("@/pages/parent/bus-tracking"))
+const StudentTransportPage = lazy(() => import("@/pages/student/transport"))
+const StudentTimetablePage = lazy(() => import("@/pages/student/timetable"))
 
 const ProfilePage = lazy(() => import("@/pages/profile"));
 const NotFoundPage = lazy(() => import("@/pages/not-found"));
@@ -330,6 +332,7 @@ const AppRouter: React.FC = () => {
                 "teacher",
                 "student",
                 "parent",
+                "driver",
               ]}
             >
               <AnnouncementsPage />
@@ -346,6 +349,7 @@ const AppRouter: React.FC = () => {
                     "teacher",
                     "student",
                     "parent",
+                    "driver",
                   ]}
                 >
                   <AnnouncementDetailsPage />
@@ -365,6 +369,7 @@ const AppRouter: React.FC = () => {
                 "teacher",
                 "student",
                 "parent",
+                "driver",
               ]}
             >
               <MessagesPage />
@@ -507,6 +512,13 @@ const AppRouter: React.FC = () => {
           ),
         },
         {
+          path: "/driver",
+          element: (
+            <Navigate to="/driver/rider-management" replace />
+          ),
+        },
+
+        {
           path: "/driver/dashboard",
           element: (
             <PrivateRoute allowedRoles={["driver"]}>
@@ -531,10 +543,10 @@ const AppRouter: React.FC = () => {
           ),
         },
         {
-          path: "/driver/stops",
+          path: "/driver/rider-management",
           element: (
             <PrivateRoute allowedRoles={["driver"]}>
-              <DriverStopsPage />
+              <RiderManagementPage />
             </PrivateRoute>
           ),
         },
@@ -562,7 +574,22 @@ const AppRouter: React.FC = () => {
             </PrivateRoute>
           ),
         },
-
+        {
+          path: "/student/transport",
+          element: (
+            <PrivateRoute allowedRoles={["student"]}>
+              <StudentTransportPage />
+            </PrivateRoute>
+          ),
+        },
+        {
+          path: "/student/timetable",
+          element: (
+            <PrivateRoute allowedRoles={["student"]}>
+              <StudentTimetablePage />
+            </PrivateRoute>
+          ),
+        },
 
         {
           path: "/profile",

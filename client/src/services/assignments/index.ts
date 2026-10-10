@@ -60,6 +60,7 @@ export const useAssignmentService = () => {
     lesson?: string;
     startDate?: string;
     dueDate?: string;
+    childId?: string;
   } = {
     limit: getLimit(),
     page: getPage(),
@@ -84,6 +85,9 @@ export const useAssignmentService = () => {
   if (dueDate) {
     params.dueDate = dueDate;
   }
+
+  const childId = searchParams.get("childId");
+  if (childId) params.childId = childId;
 
   const getAllAssignments = useQueryHandler({
     queryKey: ["assignments", params],

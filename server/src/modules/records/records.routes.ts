@@ -58,6 +58,19 @@ const stampAuthor = (req: any) => (data: Record<string, any>) => {
 /** Teachers write their own records; everyone else may only read theirs. */
 const approvedStatuses = ["approved", "finished"];
 
+const parentChildren = async (parentId: string, childId?: string) => {
+  if (childId && !isObjectId(childId)) return [];
+  return prisma.student.findMany({
+    where: { parentId, ...(childId ? { id: childId } : {}) },
+    select: { id: true, classId: true },
+  });
+};
+
+const parentClassIds = async (parentId: string, childId?: string): Promise<string[]> => {
+  const children = await parentChildren(parentId, childId);
+  return [...new Set(children.map((child) => child.classId).filter((id): id is string => Boolean(id)))];
+};
+
 /** Scopes published-record reads by audience (students/parents → approved). */
 const broadcastReadScope = async (req: any, where: Record<string, any>) => {
   const role = req.user?.role;
@@ -73,13 +86,38 @@ const broadcastReadScope = async (req: any, where: Record<string, any>) => {
     ];
   } else if (role === "student" || role === "parent") {
     where.status = { in: approvedStatuses };
+    if (role === "student") {
+      const student = await prisma.student.findUnique({ where: { id: req.user.id }, select: { classId: true } });
+      pushScope(where, { OR: [{ classId: null }, ...(student?.classId ? [{ classId: student.classId }] : [])] });
+    } else {
+      const classIds = await parentClassIds(req.user.id, String(req.query?.childId ?? "") || undefined);
+      pushScope(where, { OR: [{ classId: null }, { classId: { in: classIds } }] });
+    }
+  }
+};
+
+const broadcastReadOneScope = async (req: any, doc: Record<string, any>) => {
+  if (req.user?.role !== "parent" && req.user?.role !== "student") return;
+  if (!approvedStatuses.includes(String(doc.status))) {
+    throw forbidden("You do not have access to this event");
+  }
+  if (!doc.classId) return;
+  if (req.user?.role === "student") {
+    const student = await prisma.student.findUnique({ where: { id: req.user.id }, select: { classId: true } });
+    if (student?.classId !== String(doc.classId)) throw forbidden("You do not have access to this event");
+    return;
+  }
+  const classIds = await parentClassIds(req.user.id);
+  if (!classIds.includes(String(doc.classId))) {
+    throw forbidden("You do not have access to this event");
   }
 };
 
 /**
- * Announcements/events ownership + approval guard. Teachers may manage only
- * records they authored, and can never flip a record to `approved`/`rejected`
- * — that authority stays with admins, preserving the existing workflow.
+ * Announcements/events ownership + approval guard. Teachers and drivers may
+ * manage only records they authored, and can never flip a record to
+ * `approved`/`rejected` — that authority stays with admins, preserving the
+ * existing workflow.
  */
 const broadcastWriteScope = async (
   req: any,
@@ -87,7 +125,8 @@ const broadcastWriteScope = async (
   target: Record<string, any>,
   payload?: Record<string, any>
 ) => {
-  if (req.user?.role !== "teacher") return;
+  const role = req.user?.role;
+  if (role !== "teacher" && role !== "driver") return;
 
   if (mode === "delete") {
     if (target.createdById !== req.user.id || target.createdByModel !== "teacher") {
@@ -121,6 +160,7 @@ const broadcastWriteScope = async (
 const broadcastAuthz = {
   writeRoles: STAFF_ROLES,
   readScope: broadcastReadScope,
+  readOneScope: broadcastReadOneScope,
   writeScope: broadcastWriteScope,
 };
 
@@ -187,10 +227,7 @@ export const resultsRouter = crudRouter({
       } else if (role === "student") {
         pushScope(where, { studentId: uid });
       } else if (role === "parent") {
-        const children = await prisma.student.findMany({
-          where: { parentId: uid },
-          select: { id: true },
-        });
+        const children = await parentChildren(uid, String(req.query?.childId ?? "") || undefined);
         pushScope(where, { studentId: { in: children.map((c) => c.id) } });
       }
     },
@@ -284,19 +321,31 @@ export const attendancesRouter = crudRouter({
   authz: {
     writeRoles: STAFF_ROLES,
     readScope: async (req, where) => {
-      if (req.user?.role !== "teacher") return;
-      const scope = await teacherClassIds(req.user.id);
-      pushScope(where, { classId: { in: [...scope] } });
+      if (req.user?.role === "teacher") {
+        const scope = await teacherClassIds(req.user.id);
+        pushScope(where, { classId: { in: [...scope] } });
+      } else if (req.user?.role === "parent") {
+        const children = await parentChildren(req.user.id, String(req.query?.childId ?? "") || undefined);
+        pushScope(where, { studentId: { in: children.map((child) => child.id) } });
+      } else if (req.user?.role === "student") {
+        pushScope(where, { studentId: req.user.id });
+      }
     },
     writeScope: async (req, mode, target) => {
       if (req.user?.role !== "teacher") return;
       await assertTeacherClass(req, target.classId);
     },
     readOneScope: async (req, doc) => {
-      if (req.user?.role !== "teacher") return;
-      const scope = await teacherClassIds(req.user.id);
-      if (doc.classId && !scope.has(String(doc.classId))) {
-        throw forbidden("You do not have access to this attendance record");
+      if (req.user?.role === "teacher") {
+        const scope = await teacherClassIds(req.user.id);
+        if (doc.classId && !scope.has(String(doc.classId))) {
+          throw forbidden("You do not have access to this attendance record");
+        }
+      } else if (req.user?.role === "parent") {
+        const child = doc.studentId ? await prisma.student.findFirst({ where: { id: String(doc.studentId), parentId: req.user.id }, select: { id: true } }) : null;
+        if (!child) throw forbidden("You can only view your children's attendance");
+      } else if (req.user?.role === "student" && String(doc.studentId ?? "") !== String(req.user.id)) {
+        throw forbidden("You can only view your own attendance");
       }
     },
   },

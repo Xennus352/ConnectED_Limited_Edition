@@ -5,13 +5,10 @@ import { useTranslation } from "react-i18next";
 import DropDown from "../dropdown";
 import CardTitle from "../card-title";
 import { Card } from "@/components/ui/card";
-import AnnouncementsFeatures from "./features";
 import { useAnnouncementsService } from "@/services/announcements";
 
 const Announcements: React.FC = () => {
   const { t } = useTranslation();
-  const { announcements } = AnnouncementsFeatures();
-
   const { getAllAnnouncements } = useAnnouncementsService();
 
   const { data, isLoading } = getAllAnnouncements;
@@ -29,10 +26,10 @@ const Announcements: React.FC = () => {
       <DropDown url='/list/announcements' />
 
       <div className='flex flex-col gap-4'>
-        {announcements?.length === 0 ? (
+        {!data?.data?.length ? (
           <p>{t("admin_dashboard.no_data_available")}</p>
         ) : (
-          data?.data?.map(({ _id, name, description }: any) => (
+          data?.data?.slice(0, 3).map(({ _id, name, description }: any) => (
             <Card
               key={_id}
               className={`p-4 hover:scale-95 transition-all`}

@@ -161,8 +161,8 @@ const DriverBusPage: React.FC = () => {
                     </Link>
                   </Button>
                   <Button variant='ghost' size='sm' className='justify-between gap-2 text-muted-foreground' asChild>
-                    <Link to='/driver/stops'>
-                      {t("driver_bus.open_stops")}
+                    <Link to='/driver/rider-management'>
+                      {t("driver_bus.open_rider_management")}
                       <ChevronRight className='h-4 w-4' />
                     </Link>
                   </Button>

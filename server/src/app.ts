@@ -29,6 +29,7 @@ import {
   lessonsRouter,
   roomsRouter,
   subjectsRouter,
+  studentDashboardRouter,
 } from "./modules/academic/academic.routes";
 import {
   announcementsRouter,
@@ -140,6 +141,7 @@ export const createApp = () => {
   api.use("/lessons", lessonsRouter);
   api.use("/exams", examsRouter);
   api.use("/assignments", assignmentsRouter);
+  api.use("/student", studentDashboardRouter);
 
   api.use("/results", resultsRouter);
   api.use("/attendances", attendancesRouter);

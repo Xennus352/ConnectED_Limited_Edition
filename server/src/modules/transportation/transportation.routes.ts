@@ -1,11 +1,14 @@
 import { Router, type RequestHandler } from "express";
 
 import { asyncHandler } from "../../lib/async-handler";
+import { prisma } from "../../config/prisma";
 import { crudRouter } from "../shared/crud";
 import {
   getBusTrack,
   getDriverBus,
   getFleetSnapshot,
+  getStudentTransport,
+  resolveDriverBusId,
 } from "./fleet";
 import {
   startTrip,
@@ -149,6 +152,7 @@ transportCustomRouter.get("/admin/fleet", asyncHandler(getFleetSnapshot));
 transportCustomRouter.get("/fleet", asyncHandler(getFleetSnapshot));
 transportCustomRouter.get("/parent/fleet", asyncHandler(getFleetSnapshot));
 transportCustomRouter.get("/driver/bus", asyncHandler(getDriverBus));
+transportCustomRouter.get("/student/transport", asyncHandler(getStudentTransport));
 transportCustomRouter.get("/buses/:id/track", asyncHandler(getBusTrack));
 
 transportCustomRouter.post(
@@ -179,6 +183,122 @@ transportCustomRouter.post(
 );
 
 // Driver's own incident history (used by the driver alerts centre).
+
+// Driver bus assignments — scoped to the authenticated driver's assigned bus.
+const driverAssignmentRouter = Router();
+driverAssignmentRouter.use(requireDriver);
+
+driverAssignmentRouter.get(
+  "/",
+  asyncHandler(async (req, res) => {
+    const driverBusId = await resolveDriverBusId(req.user!.id);
+    if (!driverBusId) {
+      return res.json({ success: true, data: [], meta: { total: 0, skip: 0, limit: 0, page: 1 } });
+    }
+    const assignments = await prisma.busStudentAssignment.findMany({
+      where: { busId: driverBusId, isActive: true },
+      include: {
+        student: { select: { id: true, fullName: true, profilePhoto: true } },
+        pickupStop: true,
+        dropoffStop: true,
+      },
+      orderBy: { assignedAt: "desc" },
+    });
+    res.json({
+      success: true,
+      data: assignments.map((a) => ({
+        ...a,
+        student: a.student ? { id: a.student.id, fullName: a.student.fullName, profilePhoto: a.student.profilePhoto } : null,
+        pickupStopName: a.pickupStop?.name,
+        dropoffStopName: a.dropoffStop?.name,
+      })),
+      meta: {
+        total: assignments.length,
+        skip: 0,
+        limit: assignments.length,
+        page: 1,
+      },
+    });
+  })
+);
+
+driverAssignmentRouter.post(
+  "/create",
+  asyncHandler(async (req, res) => {
+    const driverBusId = await resolveDriverBusId(req.user!.id);
+    if (!driverBusId) {
+      return res.json({ success: false, message: "Driver not assigned to a bus" });
+    }
+    const { studentId, pickupStopId, dropoffStopId } = req.body;
+    if (!studentId) {
+      return res.json({ success: false, message: "Student is required" });
+    }
+    const assignment = await prisma.busStudentAssignment.create({
+      data: {
+        busId: driverBusId,
+        studentId: req.body.studentId,
+        pickupStopId,
+        dropoffStopId,
+        isActive: true,
+      },
+      include: {
+        student: { select: { id: true, fullName: true, profilePhoto: true } },
+        pickupStop: true,
+        dropoffStop: true,
+      },
+    });
+    res.json({ success: true, data: assignment });
+  })
+);
+
+driverAssignmentRouter.put(
+  "/:id",
+  asyncHandler(async (req, res) => {
+    const driverBusId = await resolveDriverBusId(req.user!.id);
+    if (!driverBusId) {
+      return res.json({ success: false, message: "Driver not assigned to a bus" });
+    }
+    const { id } = req.params;
+    const assignment = await prisma.busStudentAssignment.findUnique({ where: { id } });
+    if (!assignment || assignment.busId !== driverBusId) {
+      return res.json({ success: false, message: "Assignment not found or not yours" });
+    }
+    const updated = await prisma.busStudentAssignment.update({
+      where: { id },
+      data: {
+        studentId: req.body.studentId ?? undefined,
+        pickupStopId: req.body.pickupStopId ?? undefined,
+        dropoffStopId: req.body.dropoffStopId ?? undefined,
+      },
+      include: {
+        student: { select: { id: true, fullName: true, profilePhoto: true } },
+        pickupStop: true,
+        dropoffStop: true,
+      },
+    });
+    res.json({ success: true, data: updated });
+  })
+);
+
+driverAssignmentRouter.delete(
+  "/:id",
+  asyncHandler(async (req, res) => {
+    const driverBusId = await resolveDriverBusId(req.user!.id);
+    if (!driverBusId) {
+      return res.json({ success: false, message: "Driver not assigned to a bus" });
+    }
+    const { id } = req.params;
+    const assignment = await prisma.busStudentAssignment.findUnique({ where: { id } });
+    if (!assignment || assignment.busId !== driverBusId) {
+      return res.json({ success: false, message: "Assignment not found or not yours" });
+    }
+    await prisma.busStudentAssignment.delete({ where: { id } });
+    res.json({ success: true, data: { id } });
+  })
+);
+
+transportCustomRouter.use("/driver/assignments", driverAssignmentRouter);
+
 transportCustomRouter.get(
   "/driver/incidents",
   requireDriver,
